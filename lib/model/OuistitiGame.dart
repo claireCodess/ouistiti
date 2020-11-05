@@ -21,10 +21,10 @@ class OuistitiGame {
     final String hostId;
     final String hostNickname;
     final String hostColour;
-    final String round;
-    final String totalRoundCount;
+    final int round;
+    final int totalRoundCount;
 
-    static OuistitiGame fromMap(Map<String, dynamic> data, String id) {
+    static OuistitiGame fromMap(Map<String, dynamic> data) {
       return OuistitiGame(
           id: data["id"],
           inProgress: data["inProgress"],

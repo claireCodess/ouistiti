@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'model/OuistitiGame.dart';
 
@@ -48,7 +49,7 @@ class OuistitiApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: SelectGamePage(title: 'Ouistiti'),
+      home: SelectGamePage(title: 'Select game'),
     );
   }
 }
@@ -147,10 +148,14 @@ class _SelectGamePageState extends State<SelectGamePage> {
     });
 
     // Subscribe to an event to listen to
-    socketIO.on('listGames', (jsData) {
-      for(dynamic datum in jsData) {
-        print(datum.toString() + "\n");
-      }
+    socketIO.on('listGames', (games) {
+      print("listGames");
+      setState(() {
+        listGames.clear();
+        for(dynamic game in games) {
+          listGames.add(OuistitiGame.fromMap(game));
+        }
+      });
     });
 
     // Connect to the socket
@@ -171,57 +176,35 @@ class _SelectGamePageState extends State<SelectGamePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Padding(padding: EdgeInsets.all(8)),
-            Text("Select game", style: Theme.of(context).textTheme.headline5),
-            Padding(padding: EdgeInsets.only(bottom: 8)),
             Container(
               height: height * 0.7,
               width: width,
               child: ListView.builder(
-                itemCount: 4,
+                itemCount: listGames.length,
                 itemBuilder: (BuildContext context, int index) {
-                  int gameIndex = index + 1;
                   return Container(
-                    alignment: Alignment.center,
-                    child: MaterialButton(
+                    margin: const EdgeInsets.only(bottom: 20.0),
+                    child: TextButton.icon(
                       onPressed: () {  },
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 60.0, right: 60.0, top: 20.0, bottom: 20.0),
-                        margin: const EdgeInsets.only(bottom: 20.0),
-                        decoration: BoxDecoration(
-                          color: MaterialColor(0xff86A186, primaryColor),
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        child: Text(
-                          "Game $gameIndex",
-                          style: TextStyle(color: Colors.white, fontSize: 15.0),
-                        ),
-                      )
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                        backgroundColor: MaterialColor(0xff86A186, primaryColor),
+                        primary: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                      ),
+                      icon: Icon(Icons.videogame_asset),
+                      label: Text(
+                        listGames[index].hostNickname,
+                        style: TextStyle(fontSize: 15.0)
+                      ),
                     ),
                   );
                 },
