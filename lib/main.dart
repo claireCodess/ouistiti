@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'model/OuistitiGame.dart';
 
 void main() {
   runApp(OuistitiApp());
@@ -125,6 +127,37 @@ class SelectGamePage extends StatefulWidget {
 
 class _SelectGamePageState extends State<SelectGamePage> {
   double height, width;
+  IO.Socket socketIO;
+  List<OuistitiGame> listGames;
+
+  @override
+  void initState() {
+    // Initialising the game list
+    listGames = List<OuistitiGame>();
+
+    // Creating the socket
+    socketIO = IO.io('https://ec2.tomika.ink/ouistiti', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoconnect': false
+    });
+
+    // Triggers when the websocket connection to the backend has successfully established
+    socketIO.on('connect', (_) {
+      print("Socket connected");
+    });
+
+    // Subscribe to an event to listen to
+    socketIO.on('listGames', (jsData) {
+      for(dynamic datum in jsData) {
+        print(datum.toString() + "\n");
+      }
+    });
+
+    // Connect to the socket
+    socketIO.connect();
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
