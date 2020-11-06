@@ -1,38 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+
 import 'model/OuistitiGame.dart';
 
 void main() {
   runApp(OuistitiApp());
 }
 
-Map<int, Color> boardColor =
-{
-  50:Color.fromRGBO(54,99,54, .1),
-  100:Color.fromRGBO(54,99,54, .2),
-  200:Color.fromRGBO(54,99,54, .3),
-  300:Color.fromRGBO(54,99,54, .4),
-  400:Color.fromRGBO(54,99,54, .5),
-  500:Color.fromRGBO(54,99,54, .6),
-  600:Color.fromRGBO(54,99,54, .7),
-  700:Color.fromRGBO(54,99,54, .8),
-  800:Color.fromRGBO(54,99,54, .9),
-  900:Color.fromRGBO(54,99,54, 1),
+Map<int, Color> boardColor = {
+  50: Color.fromRGBO(54, 99, 54, .1),
+  100: Color.fromRGBO(54, 99, 54, .2),
+  200: Color.fromRGBO(54, 99, 54, .3),
+  300: Color.fromRGBO(54, 99, 54, .4),
+  400: Color.fromRGBO(54, 99, 54, .5),
+  500: Color.fromRGBO(54, 99, 54, .6),
+  600: Color.fromRGBO(54, 99, 54, .7),
+  700: Color.fromRGBO(54, 99, 54, .8),
+  800: Color.fromRGBO(54, 99, 54, .9),
+  900: Color.fromRGBO(54, 99, 54, 1),
 };
 
-Map<int, Color> primaryColor =
-{
-  50:Color.fromRGBO(134,161,134, .1),
-  100:Color.fromRGBO(134,161,134, .2),
-  200:Color.fromRGBO(134,161,134, .3),
-  300:Color.fromRGBO(134,161,134, .4),
-  400:Color.fromRGBO(134,161,134, .5),
-  500:Color.fromRGBO(134,161,134, .6),
-  600:Color.fromRGBO(134,161,134, .7),
-  700:Color.fromRGBO(134,161,134, .8),
-  800:Color.fromRGBO(134,161,134, .9),
-  900:Color.fromRGBO(134,161,134, 1),
+Map<int, Color> primaryColor = {
+  50: Color.fromRGBO(134, 161, 134, .1),
+  100: Color.fromRGBO(134, 161, 134, .2),
+  200: Color.fromRGBO(134, 161, 134, .3),
+  300: Color.fromRGBO(134, 161, 134, .4),
+  400: Color.fromRGBO(134, 161, 134, .5),
+  500: Color.fromRGBO(134, 161, 134, .6),
+  600: Color.fromRGBO(134, 161, 134, .7),
+  700: Color.fromRGBO(134, 161, 134, .8),
+  800: Color.fromRGBO(134, 161, 134, .9),
+  900: Color.fromRGBO(134, 161, 134, 1),
 };
 
 class OuistitiApp extends StatelessWidget {
@@ -107,15 +106,12 @@ class _MyHomePageState extends State<MyHomePage> {
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-          ],
+          children: <Widget>[],
         ),
-      ),// This trailing comma makes auto-formatting nicer for build methods.
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
-
-
 
 class SelectGamePage extends StatefulWidget {
   SelectGamePage({Key key, this.title}) : super(key: key);
@@ -152,7 +148,7 @@ class _SelectGamePageState extends State<SelectGamePage> {
       print("listGames");
       setState(() {
         listGames.clear();
-        for(dynamic game in games) {
+        for (dynamic game in games) {
           listGames.add(OuistitiGame.fromMap(game));
         }
       });
@@ -190,23 +186,43 @@ class _SelectGamePageState extends State<SelectGamePage> {
               child: ListView.builder(
                 itemCount: listGames.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 20.0),
-                    child: TextButton.icon(
-                      onPressed: () {  },
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
-                        backgroundColor: MaterialColor(0xff86A186, primaryColor),
-                        primary: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                      ),
-                      icon: Icon(Icons.videogame_asset),
-                      label: Text(
-                        listGames[index].hostNickname,
-                        style: TextStyle(fontSize: 15.0)
-                      ),
-                    ),
-                  );
+                  return Padding(
+                      padding: const EdgeInsets.only(
+                          left: 20.0, right: 20.0, bottom: 20.0),
+                      child: Material(
+                          color: MaterialColor(0xff86A186, primaryColor),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0)),
+                          // margin: const EdgeInsets.only(bottom: 20.0),
+                          child: InkWell(
+                              onTap: () {
+                                /*setState(() {
+
+                          });*/
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    // margin: const EdgeInsets.only(bottom: 20.0),
+                                    children: <Widget>[
+                                      ListTile(
+                                          leading: Text(
+                                              listGames[index].hostNickname,
+                                              style: TextStyle(
+                                                  fontSize: 15.0,
+                                                  color: Colors.white)),
+                                          trailing: Text(
+                                              listGames[index]
+                                                  .playersCount
+                                                  .toString(),
+                                              style: TextStyle(
+                                                  fontSize: 15.0,
+                                                  color: Colors.white))),
+                                    ]),
+                              ))));
                 },
               ),
             )
@@ -214,10 +230,10 @@ class _SelectGamePageState extends State<SelectGamePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {  },
+        onPressed: () {},
         tooltip: 'Increment',
         child: Icon(Icons.add),
-      ),// This trailing comma makes auto-formatting nicer for build methods.
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
