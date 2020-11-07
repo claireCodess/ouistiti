@@ -1,8 +1,10 @@
 {
+  "select_game_title": "Sélectionner une partie",
   "player": "joueur",
   "joinable": "Joignable",
   "password_protected": "Protégé par mot de passe",
   "in_progress": "En cours",
   "round": "Tour $round/$totalRoundCount",
-  "full": "Complet"
+  "full": "Complet",
+  "create_game_title": "Créer une partie"
 }

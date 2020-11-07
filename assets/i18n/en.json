@@ -1,8 +1,10 @@
 {
+  "select_game_title": "Select game",
   "player": "player",
   "joinable": "Joinable",
   "password_protected": "Password protected",
   "in_progress": "In progress",
   "round": "Round $round/$totalRoundCount",
-  "full": "Game full"
+  "full": "Game full",
+  "create_game_title": "Create game"
 }

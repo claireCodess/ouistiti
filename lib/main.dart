@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import 'i18n/AppLocalizations.dart';
@@ -36,6 +37,8 @@ Map<int, Color> primaryColor = {
   900: Color.fromRGBO(134, 161, 134, 1),
 };
 
+AppLocalizations i18n;
+
 class OuistitiApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -50,7 +53,7 @@ class OuistitiApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: SelectGamePage(title: 'Select game'),
+      home: SelectGamePage(),
       supportedLocales: [
         Locale('en', ''),
         Locale('fr', ''),
@@ -125,9 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class SelectGamePage extends StatefulWidget {
-  SelectGamePage({Key key, this.title}) : super(key: key);
-
-  final String title;
+  SelectGamePage({Key key}) : super(key: key);
 
   @override
   _SelectGamePageState createState() => _SelectGamePageState();
@@ -136,7 +137,6 @@ class SelectGamePage extends StatefulWidget {
 class _SelectGamePageState extends State<SelectGamePage> {
   double height, width;
   IO.Socket socketIO;
-  AppLocalizations i18n;
   List<OuistitiGame> listGames;
 
   @override
@@ -185,7 +185,7 @@ class _SelectGamePageState extends State<SelectGamePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(i18n.translate("select_game_title")),
       ),
       body: Center(
         child: Column(
@@ -243,7 +243,15 @@ class _SelectGamePageState extends State<SelectGamePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return CreateGameScreen();
+              },
+            ),
+          );
+        },
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
