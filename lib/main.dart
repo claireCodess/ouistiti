@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import 'i18n/AppLocalizations.dart';
 import 'model/OuistitiGame.dart';
 
 void main() {
@@ -49,6 +51,15 @@ class OuistitiApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: SelectGamePage(title: 'Select game'),
+      supportedLocales: [
+        Locale('en', ''),
+        Locale('fr', ''),
+      ],
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
     );
   }
 }
@@ -125,6 +136,7 @@ class SelectGamePage extends StatefulWidget {
 class _SelectGamePageState extends State<SelectGamePage> {
   double height, width;
   IO.Socket socketIO;
+  AppLocalizations i18n;
   List<OuistitiGame> listGames;
 
   @override
@@ -164,6 +176,7 @@ class _SelectGamePageState extends State<SelectGamePage> {
   Widget build(BuildContext context) {
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
+    i18n = AppLocalizations.of(context);
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -186,6 +199,7 @@ class _SelectGamePageState extends State<SelectGamePage> {
               child: ListView.builder(
                 itemCount: listGames.length,
                 itemBuilder: (BuildContext context, int index) {
+                  OuistitiGame game = listGames[index];
                   return Padding(
                       padding: const EdgeInsets.only(
                           left: 20.0, right: 20.0, bottom: 20.0),
@@ -202,26 +216,25 @@ class _SelectGamePageState extends State<SelectGamePage> {
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    // margin: const EdgeInsets.only(bottom: 20.0),
-                                    children: <Widget>[
-                                      ListTile(
-                                          leading: Text(
-                                              listGames[index].hostNickname,
-                                              style: TextStyle(
-                                                  fontSize: 15.0,
-                                                  color: Colors.white)),
-                                          trailing: Text(
-                                              listGames[index]
-                                                  .playersCount
-                                                  .toString(),
-                                              style: TextStyle(
-                                                  fontSize: 15.0,
-                                                  color: Colors.white))),
-                                    ]),
+                                child: ListTile(
+                                    isThreeLine: true,
+                                    leading: Icon(Icons.videogame_asset,
+                                        size: 28.0, color: Colors.white),
+                                    title: Text(game.hostNickname,
+                                        style: TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white)),
+                                    subtitle: Text(
+                                        "${game.inProgress ? "${i18n.translate("inProgress")}\n${i18n.translate("round")}" : (game.joinable ? "${i18n.translate("joinable")}${game.passwordProtected ? "\n${i18n.translate("password_protected")}" : ''}" : i18n.translate("full"))}",
+                                        style: TextStyle(color: Colors.white)),
+                                    trailing: Text(
+                                        "${game.playersCount.toString()} "
+                                        "${i18n.translate("player")}"
+                                        "${game.playersCount > 1 ? 's' : ''}",
+                                        style: TextStyle(
+                                            fontSize: 15.0,
+                                            color: Colors.white))),
                               ))));
                 },
               ),

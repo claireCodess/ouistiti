@@ -1,0 +1,8 @@
+{
+  "player": "player",
+  "joinable": "Joinable",
+  "password_protected": "Password protected",
+  "in_progress": "In progress",
+  "round": "Round $round/$totalRoundCount",
+  "full": "Game full"
+}
