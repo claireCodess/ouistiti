@@ -6,5 +6,8 @@
   "in_progress": "En cours",
   "round": "Tour $round/$totalRoundCount",
   "full": "Complet",
-  "create_game_title": "Créer une partie"
+  "create_game_title": "Créer une partie",
+  "nickname_field": "Surnom",
+  "password_field": "Mot de passe (laisser vide pour aucun mdp)",
+  "create_button": "Créer"
 }

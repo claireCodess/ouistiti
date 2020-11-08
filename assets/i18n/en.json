@@ -6,5 +6,8 @@
   "in_progress": "In progress",
   "round": "Round $round/$totalRoundCount",
   "full": "Game full",
-  "create_game_title": "Create game"
+  "create_game_title": "Create game",
+  "nickname_field": "Nickname",
+  "password_field": "Password (leave blank for no password)",
+  "create_button": "Create"
 }
