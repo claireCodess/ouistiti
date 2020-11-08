@@ -247,7 +247,7 @@ class _SelectGamePageState extends State<SelectGamePage> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {
-                return CreateGameScreen();
+                return CreateGameScreen(context, socketIO);
               },
             ),
           );
