@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:provider/provider.dart';
 
+import 'dto/OuistitiGame.dart';
 import 'i18n/AppLocalizations.dart';
-import 'model/OuistitiGame.dart';
+import 'model/GamesModel.dart';
 
 void main() {
-  runApp(OuistitiApp());
+  runApp(
+      Provider<GamesModel>(create: (_) => GamesModel(), child: OuistitiApp()));
 }
 
 Map<int, Color> boardColor = {
@@ -53,7 +55,7 @@ class OuistitiApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: SelectGamePage(),
+      home: SelectGameScreen(),
       supportedLocales: [
         Locale('en', ''),
         Locale('fr', ''),
@@ -127,49 +129,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class SelectGamePage extends StatefulWidget {
-  SelectGamePage({Key key}) : super(key: key);
+class SelectGameScreen extends StatefulWidget {
+  SelectGameScreen({Key key}) : super(key: key);
 
   @override
-  _SelectGamePageState createState() => _SelectGamePageState();
+  _SelectGameScreenState createState() => _SelectGameScreenState();
 }
 
-class _SelectGamePageState extends State<SelectGamePage> {
+class _SelectGameScreenState extends State<SelectGameScreen> {
   double height, width;
-  IO.Socket socketIO;
-  List<OuistitiGame> listGames;
 
   @override
   void initState() {
-    // Initialising the game list
-    listGames = List<OuistitiGame>();
-
-    // Creating the socket
-    socketIO = IO.io('https://ec2.tomika.ink/ouistiti', <String, dynamic>{
-      'transports': ['websocket'],
-      'autoconnect': false
-    });
-
-    // Triggers when the websocket connection to the backend has successfully established
-    socketIO.on('connect', (_) {
-      print("Socket connected");
-    });
-
-    // Subscribe to an event to listen to
-    socketIO.on('listGames', (games) {
-      print("listGames");
-      setState(() {
-        listGames.clear();
-        for (dynamic game in games) {
-          listGames.add(OuistitiGame.fromMap(game));
-        }
-      });
-    });
-
-    // Connect to the socket
-    socketIO.connect();
-
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print("Done loading widget");
+      Provider.of<GamesModel>(context, listen: false)
+          .initSocketAndEstablishConnection();
+    });
   }
 
   @override
@@ -183,6 +160,7 @@ class _SelectGamePageState extends State<SelectGamePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+    print("Build main widget");
     return Scaffold(
       appBar: AppBar(
         title: Text(i18n.translate("select_game_title")),
@@ -196,46 +174,12 @@ class _SelectGamePageState extends State<SelectGamePage> {
             Container(
               height: height * 0.7,
               width: width,
-              child: ListView.builder(
-                itemCount: listGames.length,
-                itemBuilder: (BuildContext context, int index) {
-                  OuistitiGame game = listGames[index];
-                  return Padding(
-                      padding: const EdgeInsets.only(
-                          left: 20.0, right: 20.0, bottom: 20.0),
-                      child: Material(
-                          color: MaterialColor(0xff86A186, primaryColor),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0)),
-                          // margin: const EdgeInsets.only(bottom: 20.0),
-                          child: InkWell(
-                              onTap: () {
-                                /*setState(() {
-
-                          });*/
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListTile(
-                                    isThreeLine: true,
-                                    leading: Icon(Icons.videogame_asset,
-                                        size: 28.0, color: Colors.white),
-                                    title: Text(game.hostNickname,
-                                        style: TextStyle(
-                                            fontSize: 20.0,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white)),
-                                    subtitle: Text(
-                                        "${game.inProgress ? "${i18n.translate("inProgress")}\n${i18n.translate("round")}" : (game.joinable ? "${i18n.translate("joinable")}${game.passwordProtected ? "\n${i18n.translate("password_protected")}" : ''}" : i18n.translate("full"))}",
-                                        style: TextStyle(color: Colors.white)),
-                                    trailing: Text(
-                                        "${game.playersCount.toString()} "
-                                        "${i18n.translate("player")}"
-                                        "${game.playersCount > 1 ? 's' : ''}",
-                                        style: TextStyle(
-                                            fontSize: 15.0,
-                                            color: Colors.white))),
-                              ))));
+              child: StreamProvider<List<OuistitiGame>>.value(
+                value: Provider.of<GamesModel>(context).listGamesToStream,
+                builder: (context, child) {
+                  print("Need to rebuild");
+                  return buildColumnWithData(
+                      context.watch<List<OuistitiGame>>());
                 },
               ),
             )
@@ -243,18 +187,73 @@ class _SelectGamePageState extends State<SelectGamePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
+        onPressed: () async {
+          bool gameCreated = await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {
-                return CreateGameScreen(context, socketIO);
+                return CreateGameScreen();
               },
             ),
           );
+          if (gameCreated) {
+            Provider.of<GamesModel>(context, listen: false)
+                .socketIO
+                .emit('listGames');
+          }
         },
-        tooltip: 'Increment',
+        tooltip: 'Create game',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+    );
+  }
+
+  Widget buildColumnWithData(List<OuistitiGame> listGames) {
+    if (listGames == null) {
+      return buildLoading();
+    } else {
+      print("Rebuilding list of games...with ${listGames.length} games");
+      return ListView.builder(
+        itemCount: listGames.length,
+        itemBuilder: (BuildContext context, int index) {
+          OuistitiGame game = listGames[index];
+          return Padding(
+              padding:
+                  const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+              child: Material(
+                  color: MaterialColor(0xff86A186, primaryColor),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: InkWell(
+                      onTap: () {},
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListTile(
+                            isThreeLine: true,
+                            leading: Icon(Icons.videogame_asset,
+                                size: 28.0, color: Colors.white),
+                            title: Text(game.hostNickname,
+                                style: TextStyle(
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white)),
+                            subtitle: Text(
+                                "${game.inProgress ? "${i18n.translate("inProgress")}\n${i18n.translate("round")}" : (game.joinable ? "${i18n.translate("joinable")}${game.passwordProtected ? "\n${i18n.translate("password_protected")}" : ''}" : i18n.translate("full"))}",
+                                style: TextStyle(color: Colors.white)),
+                            trailing: Text(
+                                "${game.playersCount.toString()} "
+                                "${i18n.translate("player")}"
+                                "${game.playersCount > 1 ? 's' : ''}",
+                                style: TextStyle(
+                                    fontSize: 15.0, color: Colors.white))),
+                      ))));
+        },
+      );
+    }
+  }
+
+  Widget buildLoading() {
+    return Center(
+      child: CircularProgressIndicator(),
     );
   }
 }
