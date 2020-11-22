@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ouistiti/util/PopResult.dart';
 
 import '../../main.dart';
+import 'SelectGameScreen.dart';
 
 class InGameScreen extends StatefulWidget {
   InGameScreen({Key key}) : super(key: key);
+
+  static final String pageName = "/inGame";
 
   @override
   _InGameScreenState createState() => _InGameScreenState();
 }
 
 class _InGameScreenState extends State<InGameScreen> {
-  createLeaveGameAlertDialog(BuildContext context) {
+  Future<PopWithResults> createLeaveGameAlertDialog(BuildContext context) {
     return showDialog(
         context: context,
         builder: (context) {
@@ -22,13 +26,19 @@ class _InGameScreenState extends State<InGameScreen> {
                 FlatButton(
                   child: Text("Yes"),
                   onPressed: () {
-                    Navigator.of(context)
-                        .popUntil(ModalRoute.withName('/selectGame'));
+                    // Close the dialog AND transfer PopWithResults to pop directly back
+                    // to the select game screen
+                    Navigator.of(context).pop(PopWithResults(
+                        fromPage: InGameScreen.pageName,
+                        toPage: SelectGameScreen.pageName));
+                    /*Navigator.of(context)
+                        .popUntil(ModalRoute.withName('/selectGame'));*/
                   },
                 ),
                 FlatButton(
                     child: Text("No"),
                     onPressed: () {
+                      // Just close the dialog
                       Navigator.of(context).pop();
                     })
               ]);
@@ -53,7 +63,14 @@ class _InGameScreenState extends State<InGameScreen> {
 
   Future<bool> _requestPop() {
     print("requestPop");
-    createLeaveGameAlertDialog(context);
+    createLeaveGameAlertDialog(context).then((onValue) {
+      if (onValue != null) {
+        print("Player has decided to leave the game");
+        Navigator.of(context).pop(onValue);
+      } else {
+        print("Player has decided not to leave the game");
+      }
+    });
     return new Future.value(false);
   }
 }

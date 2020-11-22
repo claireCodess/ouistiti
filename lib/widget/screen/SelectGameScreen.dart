@@ -3,14 +3,19 @@ import 'package:flutter/widgets.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
+import 'package:ouistiti/util/PopResult.dart';
+import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:provider/provider.dart';
 
 import '../../main.dart';
+import 'InGameScreen.dart';
 
 AppLocalizations i18n;
 
 class SelectGameScreen extends StatefulWidget {
   SelectGameScreen({Key key}) : super(key: key);
+
+  static final String pageName = "/selectGame";
 
   @override
   _SelectGameScreenState createState() => _SelectGameScreenState();
@@ -67,13 +72,28 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.of(context).pushNamed('/createGame');
-          print(
-              "Came back from create game screen without having created a game");
-          Provider.of<GamesModel>(context, listen: false)
-              .socketIO
-              .emit('listGames');
+        onPressed: () {
+          Navigator.of(context)
+              .pushNamed(CreateGameScreen.pageName)
+              .then((data) {
+            PopWithResults popResult = data as PopWithResults;
+            if (popResult != null) {
+              if (popResult.toPage == SelectGameScreen.pageName) {
+                if (popResult.fromPage == InGameScreen.pageName) {
+                  // For the moment, disconnect to "force leave game"
+                  // and then reconnect.
+                  Provider.of<GamesModel>(context, listen: false)
+                      .socketIO
+                      .disconnect();
+                  Provider.of<GamesModel>(context, listen: false)
+                      .socketIO
+                      .connect();
+                }
+              } else {
+                Navigator.of(context).pop(data);
+              }
+            }
+          });
         },
         tooltip: 'Create game',
         child: Icon(Icons.add),

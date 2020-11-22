@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:ouistiti/dto/OuistitiGameToCreate.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
+import 'package:ouistiti/util/PopResult.dart';
+import 'package:ouistiti/widget/screen/InGameScreen.dart';
 import 'package:provider/provider.dart';
 
 import '../../main.dart';
@@ -10,6 +12,8 @@ import '../../main.dart';
 AppLocalizations i18n;
 
 class CreateGameScreen extends StatefulWidget {
+  static final String pageName = "/createGame";
+
   @override
   _CreateGameScreenState createState() => _CreateGameScreenState();
 }
@@ -65,7 +69,20 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       Provider.of<GamesModel>(context, listen: false)
                           .socketIO
                           .emit('createGame', gameToCreate.toJson());
-                      Navigator.of(context).pushNamed('/inGame');
+                      Navigator.of(context)
+                          .pushNamed(InGameScreen.pageName)
+                          .then((data) {
+                        print("Returned to create game screen");
+                        if (data is PopWithResults) {
+                          print("data is PopWithResults");
+                          PopWithResults popResult = data;
+                          if (popResult.toPage == CreateGameScreen.pageName) {
+                            // ...
+                          } else {
+                            Navigator.of(context).pop(data);
+                          }
+                        }
+                      });
                     },
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.only(

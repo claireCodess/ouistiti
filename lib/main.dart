@@ -54,11 +54,11 @@ class OuistitiApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      initialRoute: '/selectGame',
-      routes: {
-        '/selectGame': (context) => SelectGameScreen(),
-        '/createGame': (context) => CreateGameScreen(),
-        '/inGame': (context) => InGameScreen(),
+      initialRoute: SelectGameScreen.pageName,
+      routes: <String, WidgetBuilder>{
+        SelectGameScreen.pageName: (context) => SelectGameScreen(),
+        CreateGameScreen.pageName: (context) => CreateGameScreen(),
+        InGameScreen.pageName: (context) => InGameScreen(),
       },
       supportedLocales: [
         Locale('en', ''),
