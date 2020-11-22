@@ -6,6 +6,7 @@ import 'package:ouistiti/model/GamesModel.dart';
 import 'package:provider/provider.dart';
 
 import '../../main.dart';
+import 'InGameScreen.dart';
 
 AppLocalizations i18n;
 
@@ -68,7 +69,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (BuildContext context) {
-                            return MyHomePage();
+                            return InGameScreen();
                           },
                         ),
                       );
