@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
-import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:provider/provider.dart';
 
 import '../../main.dart';
@@ -69,13 +68,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return CreateGameScreen();
-              },
-            ),
-          );
+          await Navigator.of(context).pushNamed('/createGame');
           print(
               "Came back from create game screen without having created a game");
           Provider.of<GamesModel>(context, listen: false)

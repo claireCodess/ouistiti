@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
+import 'package:ouistiti/widget/screen/InGameScreen.dart';
 import 'package:ouistiti/widget/screen/SelectGameScreen.dart';
 import 'package:provider/provider.dart';
 
@@ -52,7 +54,12 @@ class OuistitiApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: SelectGameScreen(),
+      initialRoute: '/selectGame',
+      routes: {
+        '/selectGame': (context) => SelectGameScreen(),
+        '/createGame': (context) => CreateGameScreen(),
+        '/inGame': (context) => InGameScreen(),
+      },
       supportedLocales: [
         Locale('en', ''),
         Locale('fr', ''),

@@ -6,7 +6,6 @@ import 'package:ouistiti/model/GamesModel.dart';
 import 'package:provider/provider.dart';
 
 import '../../main.dart';
-import 'InGameScreen.dart';
 
 AppLocalizations i18n;
 
@@ -66,13 +65,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       Provider.of<GamesModel>(context, listen: false)
                           .socketIO
                           .emit('createGame', gameToCreate.toJson());
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            return InGameScreen();
-                          },
-                        ),
-                      );
+                      Navigator.of(context).pushNamed('/inGame');
                     },
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.only(
