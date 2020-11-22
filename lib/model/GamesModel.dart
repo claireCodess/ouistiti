@@ -28,6 +28,10 @@ class GamesModel {
       print("Socket disconnected");
     });
 
+    socketIO.on('joinGameError', (errorMessage) {
+      print("joinGameError: $errorMessage");
+    });
+
     // Subscribe to an event to listen to
     socketIO.on('listGames', (games) {
       print("listGames");

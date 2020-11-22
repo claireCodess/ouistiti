@@ -70,7 +70,7 @@ class OuistitiApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key key}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -81,7 +81,7 @@ class MyHomePage extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
-  final String title;
+  final String title = "In game";
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -188,18 +188,18 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          bool gameCreated = await Navigator.of(context).push(
+          await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {
                 return CreateGameScreen();
               },
             ),
           );
-          if (gameCreated) {
-            Provider.of<GamesModel>(context, listen: false)
-                .socketIO
-                .emit('listGames');
-          }
+          print(
+              "Came back from create game screen without having created a game");
+          Provider.of<GamesModel>(context, listen: false)
+              .socketIO
+              .emit('listGames');
         },
         tooltip: 'Create game',
         child: Icon(Icons.add),
