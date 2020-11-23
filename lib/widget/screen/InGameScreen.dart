@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/util/PopResult.dart';
 
 import '../../main.dart';
@@ -15,28 +16,28 @@ class InGameScreen extends StatefulWidget {
 }
 
 class _InGameScreenState extends State<InGameScreen> {
+  AppLocalizations i18n;
+
   Future<PopWithResults> createLeaveGameAlertDialog(BuildContext context) {
     return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-              title: Text("Leave game"),
-              content: Text("Are you sure you want to leave the game?"),
+              title: Text(i18n.translate("leave_game_dialog_title")),
+              content: Text(i18n.translate("leave_game_dialog_message")),
               actions: <Widget>[
                 FlatButton(
-                  child: Text("Yes"),
+                  child: Text(i18n.translate("yes")),
                   onPressed: () {
                     // Close the dialog AND transfer PopWithResults to pop directly back
                     // to the select game screen
                     Navigator.of(context).pop(PopWithResults(
                         fromPage: InGameScreen.pageName,
                         toPage: SelectGameScreen.pageName));
-                    /*Navigator.of(context)
-                        .popUntil(ModalRoute.withName('/selectGame'));*/
                   },
                 ),
                 FlatButton(
-                    child: Text("No"),
+                    child: Text(i18n.translate("no")),
                     onPressed: () {
                       // Just close the dialog
                       Navigator.of(context).pop();
@@ -48,6 +49,7 @@ class _InGameScreenState extends State<InGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    i18n = AppLocalizations.of(context);
     return WillPopScope(
         child: Scaffold(
           backgroundColor: MaterialColor(0xff366336, boardColor),

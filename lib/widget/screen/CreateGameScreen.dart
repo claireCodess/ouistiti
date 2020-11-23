@@ -9,8 +9,6 @@ import 'package:provider/provider.dart';
 
 import '../../main.dart';
 
-AppLocalizations i18n;
-
 class CreateGameScreen extends StatefulWidget {
   static final String pageName = "/createGame";
 
@@ -19,6 +17,7 @@ class CreateGameScreen extends StatefulWidget {
 }
 
 class _CreateGameScreenState extends State<CreateGameScreen> {
+  AppLocalizations i18n;
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
   final nicknameTextFieldController = TextEditingController();

@@ -9,5 +9,9 @@
   "create_game_title": "Créer une partie",
   "nickname_field": "Surnom",
   "password_field": "Mot de passe (laisser vide pour aucun mdp)",
-  "create_button": "Créer"
+  "create_button": "Créer",
+  "leave_game_dialog_title": "Quitter le jeu",
+  "leave_game_dialog_message": "Etes-vous sûr(e) de vouloir quitter le jeu ?",
+  "yes": "Oui",
+  "no": "Non"
 }

@@ -10,8 +10,6 @@ import 'package:provider/provider.dart';
 import '../../main.dart';
 import 'InGameScreen.dart';
 
-AppLocalizations i18n;
-
 class SelectGameScreen extends StatefulWidget {
   SelectGameScreen({Key key}) : super(key: key);
 
@@ -22,6 +20,7 @@ class SelectGameScreen extends StatefulWidget {
 }
 
 class _SelectGameScreenState extends State<SelectGameScreen> {
+  AppLocalizations i18n;
   double height, width;
 
   @override
