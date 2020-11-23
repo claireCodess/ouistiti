@@ -75,29 +75,27 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
           Navigator.of(context)
               .pushNamed(CreateGameScreen.pageName)
               .then((data) {
-            PopWithResults popResult = data as PopWithResults;
-            if (popResult != null) {
-              if (popResult.toPage == SelectGameScreen.pageName) {
-                if (popResult.fromPage == InGameScreen.pageName) {
-                  // For the moment, disconnect to "force leave game"
-                  // and then reconnect.
-                  Provider.of<GamesModel>(context, listen: false)
-                      .socketIO
-                      .disconnect();
-                  Provider.of<GamesModel>(context, listen: false)
-                      .socketIO
-                      .connect();
-                }
-              } else {
-                Navigator.of(context).pop(data);
-              }
-            }
+            disconnectPlayerAfterLeavingGame(data, context);
           });
         },
         tooltip: 'Create game',
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  void disconnectPlayerAfterLeavingGame(Object data, BuildContext context) {
+    PopWithResults popResult = data as PopWithResults;
+    if (popResult != null) {
+      if (popResult.toPage == SelectGameScreen.pageName) {
+        if (popResult.fromPage == InGameScreen.pageName) {
+          // For the moment, disconnect to "force leave game"
+          // and then reconnect.
+          Provider.of<GamesModel>(context, listen: false).socketIO.disconnect();
+          Provider.of<GamesModel>(context, listen: false).socketIO.connect();
+        }
+      }
+    }
   }
 
   Widget buildColumnWithData(List<OuistitiGame> listGames) {
@@ -119,7 +117,10 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                   child: InkWell(
                       onTap: () {
                         createJoinGameAlertDialog(
-                            context, game.id, game.hostNickname);
+                                context, game.id, game.hostNickname)
+                            .then((data) {
+                          disconnectPlayerAfterLeavingGame(data, context);
+                        });
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
