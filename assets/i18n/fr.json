@@ -8,10 +8,13 @@
   "full": "Complet",
   "create_game_title": "Créer une partie",
   "nickname_field": "Surnom",
-  "password_field": "Mot de passe (laisser vide pour aucun mdp)",
+  "password_field_create_game": "Mot de passe (laisser vide pour aucun mdp)",
   "create_button": "Créer",
   "leave_game_dialog_title": "Quitter le jeu",
   "leave_game_dialog_message": "Etes-vous sûr(e) de vouloir quitter le jeu ?",
   "yes": "Oui",
-  "no": "Non"
+  "no": "Non",
+  "join_game_dialog_title": "Rejoindre le jeu de %s",
+  "password_field_join_game": "Mot de passe",
+  "join_button": "Rejoindre"
 }

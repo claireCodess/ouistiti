@@ -8,10 +8,13 @@
   "full": "Game full",
   "create_game_title": "Create game",
   "nickname_field": "Nickname",
-  "password_field": "Password (leave blank for no password)",
+  "password_field_create_game": "Password (leave blank for no password)",
   "create_button": "Create",
   "leave_game_dialog_title": "Leave game",
   "leave_game_dialog_message": "Are you sure you want to leave the game?",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+  "join_game_dialog_title": "Join %s's game",
+  "password_field_join_game": "Password",
+  "join_button": "Join"
 }

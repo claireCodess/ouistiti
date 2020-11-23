@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
+import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
 import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:provider/provider.dart';
+import 'package:sprintf/sprintf.dart';
 
 import '../../main.dart';
 import 'InGameScreen.dart';
@@ -23,6 +25,9 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
   AppLocalizations i18n;
   double height, width;
 
+  final nicknameTextFieldController = TextEditingController();
+  final passwordTextFieldController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -38,12 +43,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
     i18n = AppLocalizations.of(context);
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+
     print("Build main widget");
     return Scaffold(
       appBar: AppBar(
@@ -117,7 +117,10 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
                   child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        createJoinGameAlertDialog(
+                            context, game.id, game.hostNickname);
+                      },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ListTile(
@@ -148,5 +151,84 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     return Center(
       child: CircularProgressIndicator(),
     );
+  }
+
+  createJoinGameAlertDialog(
+      BuildContext context, String gameId, String hostNickname) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              scrollable: true,
+              title: Text(sprintf(
+                  i18n.translate("join_game_dialog_title"), [hostNickname])),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: TextField(
+                      controller: nicknameTextFieldController,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.fromLTRB(12, 12, 12, 12),
+                        border: OutlineInputBorder(),
+                        labelText: i18n.translate("nickname_field"),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: TextField(
+                      controller: passwordTextFieldController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.fromLTRB(12, 12, 12, 12),
+                        border: OutlineInputBorder(),
+                        labelText: i18n.translate("password_field_join_game"),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.only(
+                        top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
+                    backgroundColor: MaterialColor(0xff86A186, primaryColor),
+                    primary: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0)),
+                  ),
+                  child: Text(
+                    i18n.translate("join_button"),
+                    style: TextStyle(color: Colors.white, fontSize: 15.0),
+                  ),
+                  onPressed: () {
+                    OuistitiGameToCreateOrJoin gameToJoin =
+                        OuistitiGameToCreateOrJoin(
+                            id: gameId,
+                            nickname: nicknameTextFieldController.text,
+                            password: passwordTextFieldController.text);
+                    print("Join game");
+                    Provider.of<GamesModel>(context, listen: false)
+                        .socketIO
+                        .emit('joinGame', gameToJoin.toJson());
+                    Navigator.of(context)
+                        .pushNamed(InGameScreen.pageName)
+                        .then((data) {
+                      print(
+                          "Returned to select game screen - close join game dialog");
+                      if (data is PopWithResults) {
+                        print("data is PopWithResults");
+                      }
+                      Navigator.of(context).pop(data);
+                    });
+                  },
+                ),
+              ]);
+        },
+        barrierDismissible:
+            true); // The player can choose to press outside of the alert dialog to not join the game
   }
 }

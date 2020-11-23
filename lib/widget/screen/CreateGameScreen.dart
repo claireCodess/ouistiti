@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ouistiti/dto/OuistitiGameToCreate.dart';
+import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
 import 'package:ouistiti/util/PopResult.dart';
@@ -18,8 +18,7 @@ class CreateGameScreen extends StatefulWidget {
 
 class _CreateGameScreenState extends State<CreateGameScreen> {
   AppLocalizations i18n;
-  // Create a text controller and use it to retrieve the current value
-  // of the TextField.
+
   final nicknameTextFieldController = TextEditingController();
   final passwordTextFieldController = TextEditingController();
 
@@ -53,7 +52,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                     obscureText: true,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: i18n.translate("password_field"),
+                      labelText: i18n.translate("password_field_create_game"),
                     ),
                   ),
                 ),
@@ -61,9 +60,10 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      OuistitiGameToCreate gameToCreate = OuistitiGameToCreate(
-                          nickname: nicknameTextFieldController.text,
-                          password: passwordTextFieldController.text);
+                      OuistitiGameToCreateOrJoin gameToCreate =
+                          OuistitiGameToCreateOrJoin(
+                              nickname: nicknameTextFieldController.text,
+                              password: passwordTextFieldController.text);
                       print("Create game");
                       Provider.of<GamesModel>(context, listen: false)
                           .socketIO
@@ -104,10 +104,4 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
       ),
     );
   }
-
-  /*Future<bool> _requestPop() {
-    print("requestPop");
-    Navigator.of(context).pop(false); // false = game not created
-    return new Future.value(false);
-  }*/
 }
