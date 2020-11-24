@@ -28,6 +28,8 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
   final nicknameTextFieldController = TextEditingController();
   final passwordTextFieldController = TextEditingController();
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -45,43 +47,49 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     i18n = AppLocalizations.of(context);
 
     print("Build main widget");
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(i18n.translate("select_game_title")),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Padding(padding: EdgeInsets.all(8)),
-            Container(
-              height: height * 0.7,
-              width: width,
-              child: StreamProvider<List<OuistitiGame>>.value(
-                value: Provider.of<GamesModel>(context).listGamesToStream,
-                builder: (context, child) {
-                  print("Need to rebuild");
-                  return buildColumnWithData(
-                      context.watch<List<OuistitiGame>>());
-                },
+    return Provider<String>.value(
+        value: Provider.of<GamesModel>(context).errorMessage,
+        builder: (context, child) {
+          handleErrorMessageSnackBar(context);
+          return Scaffold(
+            key: _scaffoldKey,
+            appBar: AppBar(
+              title: Text(i18n.translate("select_game_title")),
+            ),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Padding(padding: EdgeInsets.all(8)),
+                  Container(
+                    height: height * 0.7,
+                    width: width,
+                    child: StreamProvider<List<OuistitiGame>>.value(
+                      value: Provider.of<GamesModel>(context).listGamesToStream,
+                      builder: (context, child) {
+                        print("Need to rebuild");
+                        return buildColumnWithData(
+                            context.watch<List<OuistitiGame>>());
+                      },
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context)
-              .pushNamed(CreateGameScreen.pageName)
-              .then((data) {
-            disconnectPlayerAfterLeavingGame(data, context);
-          });
-        },
-        tooltip: 'Create game',
-        child: Icon(Icons.add),
-      ),
-    );
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pushNamed(CreateGameScreen.pageName)
+                    .then((data) {
+                  disconnectPlayerAfterLeavingGame(data, context);
+                });
+              },
+              tooltip: 'Create game',
+              child: Icon(Icons.add),
+            ),
+          );
+        });
   }
 
   void disconnectPlayerAfterLeavingGame(Object data, BuildContext context) {
@@ -97,6 +105,10 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
       }
     }
   }
+
+  /*
+   * START WIDGETS
+   */
 
   Widget buildColumnWithData(List<OuistitiGame> listGames) {
     if (listGames == null) {
@@ -153,6 +165,27 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
       child: CircularProgressIndicator(),
     );
   }
+
+  handleErrorMessageSnackBar(BuildContext context) {
+    if (_scaffoldKey.currentState != null) {
+      String errorMessage = context.watch<String>();
+      if (errorMessage.isNotEmpty) {
+        _scaffoldKey.currentState
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [Text(errorMessage), Icon(Icons.error)],
+            ),
+            backgroundColor: Colors.red,
+          ));
+      }
+    }
+  }
+
+  /*
+   * END WIDGETS
+   */
 
   createJoinGameAlertDialog(
       BuildContext context, String gameId, String hostNickname) {
@@ -215,7 +248,8 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                     Provider.of<GamesModel>(context, listen: false)
                         .socketIO
                         .emit('joinGame', gameToJoin.toJson());
-                    Navigator.of(context)
+                    /* /////// TEMPORARILY DISABLED ///////
+                      Navigator.of(context)
                         .pushNamed(InGameScreen.pageName)
                         .then((data) {
                       print(
@@ -224,7 +258,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                         print("data is PopWithResults");
                       }
                       Navigator.of(context).pop(data);
-                    });
+                    });*/
                   },
                 ),
               ]);

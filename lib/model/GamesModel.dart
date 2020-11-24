@@ -1,11 +1,16 @@
 import 'dart:async';
 
 import 'package:ouistiti/dto/OuistitiGame.dart';
+import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class GamesModel {
   IO.Socket socketIO;
+
   List<OuistitiGame> listGames = List<OuistitiGame>();
+  OuistitiGameDetails currentGame;
+  String errorMessage = "";
+
   StreamController<List<OuistitiGame>> _controller = new StreamController();
   Stream<List<OuistitiGame>> get listGamesToStream => _controller.stream;
 
@@ -28,8 +33,14 @@ class GamesModel {
       print("Socket disconnected");
     });
 
-    socketIO.on('joinGameError', (errorMessage) {
-      print("joinGameError: $errorMessage");
+    socketIO.on('joinGameSuccess', (data) {
+      print("joinGameSuccess");
+      currentGame = OuistitiGameDetails.fromMap(data);
+    });
+
+    socketIO.on('joinGameError', (errorMsg) {
+      print("joinGameError: $errorMsg");
+      errorMessage = errorMsg;
     });
 
     // Subscribe to an event to listen to

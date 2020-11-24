@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 class OuistitiGame {
   const OuistitiGame(
-      {this.id,
+      {@required this.id,
         @required this.inProgress,
         @required this.joinable,
         @required this.passwordProtected,
