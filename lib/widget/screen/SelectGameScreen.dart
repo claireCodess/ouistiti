@@ -252,15 +252,22 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                     style: TextStyle(color: Colors.white, fontSize: 15.0),
                   ),
                   onPressed: () {
-                    OuistitiGameToCreateOrJoin gameToJoin =
-                        OuistitiGameToCreateOrJoin(
-                            id: gameId,
-                            nickname: nicknameTextFieldController.text,
-                            password: passwordTextFieldController.text);
-                    print("Join game");
-                    Provider.of<GamesModel>(context, listen: false)
-                        .socketIO
-                        .emit('joinGame', gameToJoin.toJson());
+                    if (nicknameTextFieldController.text.isNotEmpty) {
+                      OuistitiGameToCreateOrJoin gameToJoin =
+                          OuistitiGameToCreateOrJoin(
+                              id: gameId,
+                              nickname: nicknameTextFieldController.text,
+                              password: passwordTextFieldController.text);
+                      print("Join game");
+                      Provider.of<GamesModel>(context, listen: false)
+                          .socketIO
+                          .emit('joinGame', gameToJoin.toJson());
+                    } else {
+                      print("Error: please enter a nickname");
+                      context
+                          .read<GamesModel>()
+                          .showError("Please enter a nickname");
+                    }
                     /* /////// TEMPORARILY DISABLED ///////
                       Navigator.of(context)
                         .pushNamed(InGameScreen.pageName)

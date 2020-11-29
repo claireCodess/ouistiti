@@ -67,4 +67,9 @@ class GamesModel {
     // Connect to the socket
     socketIO.connect();
   }
+
+  // Show an error without making a useless call to the socket
+  void showError(String errorMessage) {
+    _errorMessageController.add(errorMessage);
+  }
 }
