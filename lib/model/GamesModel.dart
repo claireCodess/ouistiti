@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
+import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class GamesModel {
@@ -16,9 +17,10 @@ class GamesModel {
       new StreamController();
   Stream<List<OuistitiGame>> get listGamesToStream =>
       _listGamesController.stream;
-  StreamController<String> _errorMessageController =
+  StreamController<JoinGameError> _errorMessageController =
       new StreamController.broadcast();
-  Stream<String> get errorMessageToStream => _errorMessageController.stream;
+  Stream<JoinGameError> get errorMessageToStream =>
+      _errorMessageController.stream;
 
   void initSocketAndEstablishConnection() async {
     // Initialising the list of games
@@ -46,7 +48,54 @@ class GamesModel {
 
     socketIO.on('joinGameError', (errorMessage) {
       print("joinGameError: $errorMessage");
-      _errorMessageController.add(errorMessage);
+      JoinGameErrorType errorType;
+      switch (errorMessage) {
+        case "Please enter a nickname":
+          {
+            errorType = JoinGameErrorType.NICKNAME_ERROR;
+            break;
+          }
+        case "The chosen nickname is already taken":
+          {
+            errorType = JoinGameErrorType.NICKNAME_ERROR;
+            break;
+          }
+        case "Password is incorrect":
+          {
+            errorType = JoinGameErrorType.PASSWORD_ERROR;
+            break;
+          }
+        case "The game requested could not be found":
+          {
+            errorType = JoinGameErrorType.OTHER_ERROR;
+            break;
+          }
+        // The below errors have been treated before even calling joinGame on socket
+        // But we'll put them here anyway
+        case "Please enter a nickname less than 20 characters long":
+          {
+            // Make the errorMessage shorter
+            errorMessage = "Nickname too long";
+            errorType = JoinGameErrorType.NICKNAME_ERROR;
+            break;
+          }
+        case "No more players can join this game":
+          {
+            errorType = JoinGameErrorType.OTHER_ERROR;
+            break;
+          }
+        case "The game requested is already in progress":
+          {
+            errorType = JoinGameErrorType.OTHER_ERROR;
+            break;
+          }
+        default:
+          {
+            errorType = JoinGameErrorType.OTHER_ERROR;
+          }
+      }
+      _errorMessageController
+          .add(JoinGameError(errorType: errorType, errorMessage: errorMessage));
     });
 
     // Subscribe to an event to listen to
@@ -69,7 +118,8 @@ class GamesModel {
   }
 
   // Show an error without making a useless call to the socket
-  void showError(String errorMessage) {
-    _errorMessageController.add(errorMessage);
+  void showError(String errorMessage, JoinGameErrorType errorType) {
+    _errorMessageController
+        .add(JoinGameError(errorType: errorType, errorMessage: errorMessage));
   }
 }

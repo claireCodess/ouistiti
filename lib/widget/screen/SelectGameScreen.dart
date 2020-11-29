@@ -5,6 +5,7 @@ import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
 import 'package:ouistiti/util/PopResult.dart';
+import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:sprintf/sprintf.dart';
@@ -200,83 +201,96 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     return showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-              scrollable: true,
-              title: Text(sprintf(
-                  i18n.translate("join_game_dialog_title"), [hostNickname])),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: StreamProvider<String>.value(
-                        value: Provider.of<GamesModel>(context)
-                            .errorMessageToStream,
-                        builder: (context, child) {
-                          String errorMessage;
-                          String streamedData = context.watch<String>();
-                          if (streamedData != null && streamedData.isNotEmpty) {
-                            errorMessage = streamedData;
-                          } else {
-                            errorMessage = null;
-                          }
-                          return TextField(
-                            controller: nicknameTextFieldController,
+          return StreamProvider<JoinGameError>.value(
+              value: Provider.of<GamesModel>(context).errorMessageToStream,
+              builder: (context, child) {
+                String nicknameErrorMessage;
+                String passwordErrorMessage;
+                JoinGameError streamedData = context.watch<JoinGameError>();
+                if (streamedData != null &&
+                    streamedData.errorMessage.isNotEmpty) {
+                  if (streamedData.errorType ==
+                      JoinGameErrorType.NICKNAME_ERROR) {
+                    nicknameErrorMessage = streamedData.errorMessage;
+                    passwordErrorMessage = null;
+                  } else if (streamedData.errorType ==
+                      JoinGameErrorType.PASSWORD_ERROR) {
+                    passwordErrorMessage = streamedData.errorMessage;
+                    nicknameErrorMessage = null;
+                  } else {
+                    // OTHER_ERROR
+                    Navigator.of(context).pop();
+                    showErrorMessageSnackBar(streamedData.errorMessage);
+                  }
+                }
+                return AlertDialog(
+                    scrollable: true,
+                    title: Text(sprintf(
+                        i18n.translate("join_game_dialog_title"),
+                        [hostNickname])),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: TextField(
+                              controller: nicknameTextFieldController,
+                              decoration: InputDecoration(
+                                  contentPadding:
+                                      EdgeInsets.fromLTRB(12, 12, 12, 12),
+                                  border: OutlineInputBorder(),
+                                  labelText: i18n.translate("nickname_field"),
+                                  errorText: nicknameErrorMessage),
+                            )),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 8),
+                          child: TextField(
+                            controller: passwordTextFieldController,
+                            obscureText: true,
                             decoration: InputDecoration(
                                 contentPadding:
                                     EdgeInsets.fromLTRB(12, 12, 12, 12),
                                 border: OutlineInputBorder(),
-                                labelText: i18n.translate("nickname_field"),
-                                errorText: errorMessage),
-                          );
-                        }),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: TextField(
-                      controller: passwordTextFieldController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.fromLTRB(12, 12, 12, 12),
-                        border: OutlineInputBorder(),
-                        labelText: i18n.translate("password_field_join_game"),
-                      ),
+                                labelText:
+                                    i18n.translate("password_field_join_game"),
+                                errorText: passwordErrorMessage),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              actions: <Widget>[
-                TextButton(
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.only(
-                        top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
-                    backgroundColor: MaterialColor(0xff86A186, primaryColor),
-                    primary: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0)),
-                  ),
-                  child: Text(
-                    i18n.translate("join_button"),
-                    style: TextStyle(color: Colors.white, fontSize: 15.0),
-                  ),
-                  onPressed: () {
-                    if (nicknameTextFieldController.text.isNotEmpty) {
-                      OuistitiGameToCreateOrJoin gameToJoin =
-                          OuistitiGameToCreateOrJoin(
-                              id: gameId,
-                              nickname: nicknameTextFieldController.text,
-                              password: passwordTextFieldController.text);
-                      print("Join game");
-                      Provider.of<GamesModel>(context, listen: false)
-                          .socketIO
-                          .emit('joinGame', gameToJoin.toJson());
-                    } else {
-                      print("Error: please enter a nickname");
-                      context
-                          .read<GamesModel>()
-                          .showError("Please enter a nickname");
-                    }
-                    /* /////// TEMPORARILY DISABLED ///////
+                    actions: <Widget>[
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.only(
+                              top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
+                          backgroundColor:
+                              MaterialColor(0xff86A186, primaryColor),
+                          primary: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0)),
+                        ),
+                        child: Text(
+                          i18n.translate("join_button"),
+                          style: TextStyle(color: Colors.white, fontSize: 15.0),
+                        ),
+                        onPressed: () {
+                          if (nicknameTextFieldController.text.isNotEmpty) {
+                            OuistitiGameToCreateOrJoin gameToJoin =
+                                OuistitiGameToCreateOrJoin(
+                                    id: gameId,
+                                    nickname: nicknameTextFieldController.text,
+                                    password: passwordTextFieldController.text);
+                            print("Join game");
+                            Provider.of<GamesModel>(context, listen: false)
+                                .socketIO
+                                .emit('joinGame', gameToJoin.toJson());
+                          } else {
+                            print("Error: please enter a nickname");
+                            context.read<GamesModel>().showError(
+                                "Please enter a nickname",
+                                JoinGameErrorType.NICKNAME_ERROR);
+                          }
+                          /* /////// TEMPORARILY DISABLED ///////
                       Navigator.of(context)
                         .pushNamed(InGameScreen.pageName)
                         .then((data) {
@@ -287,9 +301,10 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                       }
                       Navigator.of(context).pop(data);
                     });*/
-                  },
-                ),
-              ]);
+                        },
+                      ),
+                    ]);
+              });
         },
         barrierDismissible:
             true); // The player can choose to press outside of the alert dialog to not join the game
