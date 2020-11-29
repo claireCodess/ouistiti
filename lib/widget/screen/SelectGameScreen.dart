@@ -40,6 +40,10 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     });
   }
 
+  /*
+   * START WIDGETS
+   */
+
   @override
   Widget build(BuildContext context) {
     height = MediaQuery.of(context).size.height;
@@ -47,36 +51,29 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     i18n = AppLocalizations.of(context);
 
     print("Build main widget");
-    /*return Provider<String>.value(
-        value: Provider.of<GamesModel>(context).errorMessage,
-        builder: (context, child) {
-          handleErrorMessageSnackBar(context);*/
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text(i18n.translate("select_game_title")),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Padding(padding: EdgeInsets.all(8)),
-            Container(
-              height: height * 0.7,
-              width: width,
-              child: StreamProvider<List<OuistitiGame>>.value(
-                value: Provider.of<GamesModel>(context).listGamesToStream,
-                builder: (context, child) {
-                  print("Need to rebuild");
-                  return buildColumnWithData(
-                      context.watch<List<OuistitiGame>>());
-                },
-              ),
-            )
-          ],
-        ),
-      ),
+          child: StreamProvider<List<OuistitiGame>>.value(
+              value: Provider.of<GamesModel>(context).listGamesToStream,
+              builder: (context, child) {
+                print("Need to rebuild");
+                List<OuistitiGame> listGames =
+                    context.watch<List<OuistitiGame>>();
+                if (listGames != null) {
+                  return Container(
+                    padding: EdgeInsets.only(top: 20),
+                    height: height,
+                    width: width,
+                    child: buildListGames(listGames),
+                  );
+                } else {
+                  return buildLoading();
+                }
+              })),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context)
@@ -91,8 +88,82 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
         child: Icon(Icons.add),
       ),
     );
-    //});
   }
+
+  Widget buildListGames(List<OuistitiGame> listGames) {
+    print("Rebuilding list of games...with ${listGames.length} games");
+    return ListView.builder(
+      itemCount: listGames.length,
+      itemBuilder: (BuildContext context, int index) {
+        OuistitiGame game = listGames[index];
+        Color gameColor;
+        if (game.inProgress || !game.joinable) {
+          gameColor = Theme.of(context).primaryColorLight;
+        } else {
+          gameColor = Theme.of(context).primaryColor;
+        }
+        return Padding(
+            padding:
+                const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+            child: Material(
+                color: gameColor,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
+                child: InkWell(
+                    onTap: () {
+                      if (game.inProgress) {
+                        showErrorMessageSnackBar("Game already in progress");
+                      } else if (!game.joinable) {
+                        showErrorMessageSnackBar(
+                            "No more players can join this game");
+                      } else {
+                        // The player can access the dialog to enter
+                        // nickname and maybe password
+                        createJoinGameAlertDialog(
+                                context, game.id, game.hostNickname)
+                            .then((data) {
+                          if (data is PopWithResults) {
+                            disconnectPlayerAfterLeavingGame(data, context);
+                          } else if (data is JoinGameError) {
+                            showErrorMessageSnackBar(data.errorMessage);
+                          }
+                        });
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                          isThreeLine: true,
+                          leading: Icon(Icons.videogame_asset,
+                              size: 28.0, color: Colors.white),
+                          title: Text(game.hostNickname,
+                              style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                          subtitle: Text(
+                              "${game.inProgress ? "${i18n.translate("inProgress")}\n${i18n.translate("round")}" : (game.joinable ? "${i18n.translate("joinable")}${game.passwordProtected ? "\n${i18n.translate("password_protected")}" : ''}" : i18n.translate("full"))}",
+                              style: TextStyle(color: Colors.white)),
+                          trailing: Text(
+                              "${game.playersCount.toString()} "
+                              "${i18n.translate("player")}"
+                              "${game.playersCount > 1 ? 's' : ''}",
+                              style: TextStyle(
+                                  fontSize: 15.0, color: Colors.white))),
+                    ))));
+      },
+    );
+  }
+
+  Widget buildLoading() {
+    return Container(
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  /*
+   * END WIDGETS
+   */
 
   void disconnectPlayerAfterLeavingGame(
       PopWithResults popResult, BuildContext context) {
@@ -106,85 +177,6 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
         }
       }
     }
-  }
-
-  /*
-   * START WIDGETS
-   */
-
-  Widget buildColumnWithData(List<OuistitiGame> listGames) {
-    if (listGames == null) {
-      return buildLoading();
-    } else {
-      print("Rebuilding list of games...with ${listGames.length} games");
-      return ListView.builder(
-        itemCount: listGames.length,
-        itemBuilder: (BuildContext context, int index) {
-          OuistitiGame game = listGames[index];
-          Color gameColor;
-          if (game.inProgress || !game.joinable) {
-            gameColor = Theme.of(context).primaryColorLight;
-          } else {
-            gameColor = Theme.of(context).primaryColor;
-          }
-          return Padding(
-              padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
-              child: Material(
-                  color: gameColor,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0)),
-                  child: InkWell(
-                      onTap: () {
-                        if (game.inProgress) {
-                          showErrorMessageSnackBar("Game already in progress");
-                        } else if (!game.joinable) {
-                          showErrorMessageSnackBar(
-                              "No more players can join this game");
-                        } else {
-                          // The player can access the dialog to enter
-                          // nickname and maybe password
-                          createJoinGameAlertDialog(
-                                  context, game.id, game.hostNickname)
-                              .then((data) {
-                            if (data is PopWithResults) {
-                              disconnectPlayerAfterLeavingGame(data, context);
-                            } else if (data is JoinGameError) {
-                              showErrorMessageSnackBar(data.errorMessage);
-                            }
-                          });
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ListTile(
-                            isThreeLine: true,
-                            leading: Icon(Icons.videogame_asset,
-                                size: 28.0, color: Colors.white),
-                            title: Text(game.hostNickname,
-                                style: TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white)),
-                            subtitle: Text(
-                                "${game.inProgress ? "${i18n.translate("inProgress")}\n${i18n.translate("round")}" : (game.joinable ? "${i18n.translate("joinable")}${game.passwordProtected ? "\n${i18n.translate("password_protected")}" : ''}" : i18n.translate("full"))}",
-                                style: TextStyle(color: Colors.white)),
-                            trailing: Text(
-                                "${game.playersCount.toString()} "
-                                "${i18n.translate("player")}"
-                                "${game.playersCount > 1 ? 's' : ''}",
-                                style: TextStyle(
-                                    fontSize: 15.0, color: Colors.white))),
-                      ))));
-        },
-      );
-    }
-  }
-
-  Widget buildLoading() {
-    return Center(
-      child: CircularProgressIndicator(),
-    );
   }
 
   showErrorMessageSnackBar(String errorMessage) {
@@ -202,10 +194,6 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
       }
     }
   }
-
-  /*
-   * END WIDGETS
-   */
 
   createJoinGameAlertDialog(
       BuildContext context, String gameId, String hostNickname) {
