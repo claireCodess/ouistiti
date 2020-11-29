@@ -83,7 +83,9 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
           Navigator.of(context)
               .pushNamed(CreateGameScreen.pageName)
               .then((data) {
-            disconnectPlayerAfterLeavingGame(data, context);
+            if (data is PopWithResults) {
+              disconnectPlayerAfterLeavingGame(data, context);
+            }
           });
         },
         tooltip: 'Create game',
@@ -93,8 +95,8 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     //});
   }
 
-  void disconnectPlayerAfterLeavingGame(Object data, BuildContext context) {
-    PopWithResults popResult = data as PopWithResults;
+  void disconnectPlayerAfterLeavingGame(
+      PopWithResults popResult, BuildContext context) {
     if (popResult != null) {
       if (popResult.toPage == SelectGameScreen.pageName) {
         if (popResult.fromPage == InGameScreen.pageName) {
@@ -140,7 +142,11 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                           createJoinGameAlertDialog(
                                   context, game.id, game.hostNickname)
                               .then((data) {
-                            disconnectPlayerAfterLeavingGame(data, context);
+                            if (data is PopWithResults) {
+                              disconnectPlayerAfterLeavingGame(data, context);
+                            } else if (data is JoinGameError) {
+                              showErrorMessageSnackBar(data.errorMessage);
+                            }
                           });
                         }
                       },
@@ -219,8 +225,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                     nicknameErrorMessage = null;
                   } else {
                     // OTHER_ERROR
-                    Navigator.of(context).pop();
-                    showErrorMessageSnackBar(streamedData.errorMessage);
+                    Navigator.of(context).pop(streamedData);
                   }
                 }
                 return AlertDialog(
