@@ -7,8 +7,6 @@ import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/widget/screen/InGameScreen.dart';
 import 'package:provider/provider.dart';
 
-import '../../main.dart';
-
 class CreateGameScreen extends StatefulWidget {
   static final String pageName = "/createGame";
 
@@ -86,7 +84,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.only(
                           top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
-                      backgroundColor: MaterialColor(0xff86A186, primaryColor),
+                      backgroundColor: Theme.of(context).primaryColor,
                       primary: Colors.white,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20.0)),

@@ -1,4 +1,4 @@
-// From https://github.com/nguyentuanhung/flutter_popuntil/blob/master/flutter_popuntil/lib/pop_result.dart
+// Source: https://github.com/nguyentuanhung/flutter_popuntil/blob/master/flutter_popuntil/lib/pop_result.dart
 
 import 'package:meta/meta.dart';
 

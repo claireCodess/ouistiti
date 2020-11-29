@@ -6,6 +6,8 @@ import 'package:ouistiti/widget/screen/InGameScreen.dart';
 import 'package:ouistiti/widget/screen/SelectGameScreen.dart';
 import 'package:provider/provider.dart';
 
+import 'file:///C:/Utilisateurs/A670729/Documents/Perso/ouistiti/lib/util/color/MaterialColorGenerator.dart';
+
 import 'i18n/AppLocalizations.dart';
 import 'model/GamesModel.dart';
 
@@ -27,28 +29,21 @@ Map<int, Color> boardColor = {
   900: Color.fromRGBO(54, 99, 54, 1),
 };
 
-Map<int, Color> primaryColor = {
-  50: Color.fromRGBO(134, 161, 134, .1),
-  100: Color.fromRGBO(134, 161, 134, .2),
-  200: Color.fromRGBO(134, 161, 134, .3),
-  300: Color.fromRGBO(134, 161, 134, .4),
-  400: Color.fromRGBO(134, 161, 134, .5),
-  500: Color.fromRGBO(134, 161, 134, .6),
-  600: Color.fromRGBO(134, 161, 134, .7),
-  700: Color.fromRGBO(134, 161, 134, .8),
-  800: Color.fromRGBO(134, 161, 134, .9),
-  900: Color.fromRGBO(134, 161, 134, 1),
-};
+class Palette {
+  static const Color primary = Color(0xFF86A186);
+}
 
 class OuistitiApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    MaterialColor primaryColor = generateMaterialColor(Palette.primary);
     return MaterialApp(
       title: 'Ouistiti',
       theme: ThemeData(
         // This is the theme of your application.
-        primarySwatch: MaterialColor(0xff86A186, primaryColor),
+        primarySwatch: primaryColor,
+        primaryColorLight: primaryColor.shade300,
         // This makes the visual density adapt to the platform that you run
         // the app on. For desktop platforms, the controls will be smaller and
         // closer together (more dense) than on mobile platforms.

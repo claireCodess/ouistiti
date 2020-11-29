@@ -10,7 +10,6 @@ import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:sprintf/sprintf.dart';
 
-import '../../main.dart';
 import 'InGameScreen.dart';
 
 class SelectGameScreen extends StatefulWidget {
@@ -122,11 +121,17 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
         itemCount: listGames.length,
         itemBuilder: (BuildContext context, int index) {
           OuistitiGame game = listGames[index];
+          Color gameColor;
+          if (game.inProgress || !game.joinable) {
+            gameColor = Theme.of(context).primaryColorLight;
+          } else {
+            gameColor = Theme.of(context).primaryColor;
+          }
           return Padding(
               padding:
                   const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
               child: Material(
-                  color: MaterialColor(0xff86A186, primaryColor),
+                  color: gameColor,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
                   child: InkWell(
@@ -268,8 +273,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.only(
                               top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
-                          backgroundColor:
-                              MaterialColor(0xff86A186, primaryColor),
+                          backgroundColor: Theme.of(context).primaryColor,
                           primary: Colors.white,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20.0)),

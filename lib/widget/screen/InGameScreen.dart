@@ -52,7 +52,7 @@ class _InGameScreenState extends State<InGameScreen> {
     i18n = AppLocalizations.of(context);
     return WillPopScope(
         child: Scaffold(
-          backgroundColor: MaterialColor(0xff366336, boardColor),
+          backgroundColor: MaterialColor(0xFF366336, boardColor),
           body: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
