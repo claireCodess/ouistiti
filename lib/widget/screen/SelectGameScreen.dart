@@ -128,11 +128,20 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                       borderRadius: BorderRadius.circular(20.0)),
                   child: InkWell(
                       onTap: () {
-                        createJoinGameAlertDialog(
-                                context, game.id, game.hostNickname)
-                            .then((data) {
-                          disconnectPlayerAfterLeavingGame(data, context);
-                        });
+                        if (game.inProgress) {
+                          showErrorMessageSnackBar("Game already in progress");
+                        } else if (!game.joinable) {
+                          showErrorMessageSnackBar(
+                              "No more players can join this game");
+                        } else {
+                          // The player can access the dialog to enter
+                          // nickname and maybe password
+                          createJoinGameAlertDialog(
+                                  context, game.id, game.hostNickname)
+                              .then((data) {
+                            disconnectPlayerAfterLeavingGame(data, context);
+                          });
+                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -166,9 +175,8 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     );
   }
 
-  /*handleErrorMessageSnackBar(BuildContext context) {
+  showErrorMessageSnackBar(String errorMessage) {
     if (_scaffoldKey.currentState != null) {
-      String errorMessage = context.watch<String>();
       if (errorMessage.isNotEmpty) {
         _scaffoldKey.currentState
           ..hideCurrentSnackBar()
@@ -181,7 +189,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
           ));
       }
     }
-  }*/
+  }
 
   /*
    * END WIDGETS
