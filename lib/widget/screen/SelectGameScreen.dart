@@ -251,6 +251,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                                   border: OutlineInputBorder(),
                                   labelText: i18n.translate("nickname_field"),
                                   errorText: nicknameErrorMessage),
+                              maxLength: 20,
                             )),
                         Padding(
                           padding: EdgeInsets.only(bottom: 8),
