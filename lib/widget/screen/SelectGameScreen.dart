@@ -47,49 +47,49 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     i18n = AppLocalizations.of(context);
 
     print("Build main widget");
-    return Provider<String>.value(
+    /*return Provider<String>.value(
         value: Provider.of<GamesModel>(context).errorMessage,
         builder: (context, child) {
-          handleErrorMessageSnackBar(context);
-          return Scaffold(
-            key: _scaffoldKey,
-            appBar: AppBar(
-              title: Text(i18n.translate("select_game_title")),
-            ),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Padding(padding: EdgeInsets.all(8)),
-                  Container(
-                    height: height * 0.7,
-                    width: width,
-                    child: StreamProvider<List<OuistitiGame>>.value(
-                      value: Provider.of<GamesModel>(context).listGamesToStream,
-                      builder: (context, child) {
-                        print("Need to rebuild");
-                        return buildColumnWithData(
-                            context.watch<List<OuistitiGame>>());
-                      },
-                    ),
-                  )
-                ],
+          handleErrorMessageSnackBar(context);*/
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text(i18n.translate("select_game_title")),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Padding(padding: EdgeInsets.all(8)),
+            Container(
+              height: height * 0.7,
+              width: width,
+              child: StreamProvider<List<OuistitiGame>>.value(
+                value: Provider.of<GamesModel>(context).listGamesToStream,
+                builder: (context, child) {
+                  print("Need to rebuild");
+                  return buildColumnWithData(
+                      context.watch<List<OuistitiGame>>());
+                },
               ),
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context)
-                    .pushNamed(CreateGameScreen.pageName)
-                    .then((data) {
-                  disconnectPlayerAfterLeavingGame(data, context);
-                });
-              },
-              tooltip: 'Create game',
-              child: Icon(Icons.add),
-            ),
-          );
-        });
+            )
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context)
+              .pushNamed(CreateGameScreen.pageName)
+              .then((data) {
+            disconnectPlayerAfterLeavingGame(data, context);
+          });
+        },
+        tooltip: 'Create game',
+        child: Icon(Icons.add),
+      ),
+    );
+    //});
   }
 
   void disconnectPlayerAfterLeavingGame(Object data, BuildContext context) {
@@ -166,7 +166,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     );
   }
 
-  handleErrorMessageSnackBar(BuildContext context) {
+  /*handleErrorMessageSnackBar(BuildContext context) {
     if (_scaffoldKey.currentState != null) {
       String errorMessage = context.watch<String>();
       if (errorMessage.isNotEmpty) {
@@ -181,7 +181,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
           ));
       }
     }
-  }
+  }*/
 
   /*
    * END WIDGETS
@@ -201,14 +201,27 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                 children: <Widget>[
                   Padding(
                     padding: EdgeInsets.only(bottom: 8),
-                    child: TextField(
-                      controller: nicknameTextFieldController,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.fromLTRB(12, 12, 12, 12),
-                        border: OutlineInputBorder(),
-                        labelText: i18n.translate("nickname_field"),
-                      ),
-                    ),
+                    child: StreamProvider<String>.value(
+                        value: Provider.of<GamesModel>(context)
+                            .errorMessageToStream,
+                        builder: (context, child) {
+                          String errorMessage;
+                          String streamedData = context.watch<String>();
+                          if (streamedData != null && streamedData.isNotEmpty) {
+                            errorMessage = streamedData;
+                          } else {
+                            errorMessage = null;
+                          }
+                          return TextField(
+                            controller: nicknameTextFieldController,
+                            decoration: InputDecoration(
+                                contentPadding:
+                                    EdgeInsets.fromLTRB(12, 12, 12, 12),
+                                border: OutlineInputBorder(),
+                                labelText: i18n.translate("nickname_field"),
+                                errorText: errorMessage),
+                          );
+                        }),
                   ),
                   Padding(
                     padding: EdgeInsets.only(bottom: 8),

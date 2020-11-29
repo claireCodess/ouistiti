@@ -7,12 +7,18 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 class GamesModel {
   IO.Socket socketIO;
 
+  // Raw data
   List<OuistitiGame> listGames = List<OuistitiGame>();
   OuistitiGameDetails currentGame;
-  String errorMessage = "";
 
-  StreamController<List<OuistitiGame>> _controller = new StreamController();
-  Stream<List<OuistitiGame>> get listGamesToStream => _controller.stream;
+  // Streams and StreamControllers
+  StreamController<List<OuistitiGame>> _listGamesController =
+      new StreamController();
+  Stream<List<OuistitiGame>> get listGamesToStream =>
+      _listGamesController.stream;
+  StreamController<String> _errorMessageController =
+      new StreamController.broadcast();
+  Stream<String> get errorMessageToStream => _errorMessageController.stream;
 
   void initSocketAndEstablishConnection() async {
     // Initialising the list of games
@@ -38,9 +44,9 @@ class GamesModel {
       currentGame = OuistitiGameDetails.fromMap(data);
     });
 
-    socketIO.on('joinGameError', (errorMsg) {
-      print("joinGameError: $errorMsg");
-      errorMessage = errorMsg;
+    socketIO.on('joinGameError', (errorMessage) {
+      print("joinGameError: $errorMessage");
+      _errorMessageController.add(errorMessage);
     });
 
     // Subscribe to an event to listen to
@@ -55,7 +61,7 @@ class GamesModel {
         listGames.add(OuistitiGame.fromMap(game));
       }
       print("Add to controller the new list of games");
-      _controller.add(listGames);
+      _listGamesController.add(listGames);
     });
 
     // Connect to the socket
