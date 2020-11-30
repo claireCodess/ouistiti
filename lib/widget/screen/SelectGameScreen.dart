@@ -75,6 +75,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                 }
               })),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).primaryColorDark,
         onPressed: () {
           Navigator.of(context)
               .pushNamed(CreateGameScreen.pageName)
