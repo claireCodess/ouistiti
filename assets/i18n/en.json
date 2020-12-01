@@ -16,5 +16,13 @@
   "no": "No",
   "join_game_dialog_title": "Join %s's game",
   "password_field_join_game": "Password",
-  "join_button": "Join"
+  "join_button": "Join",
+  "error_no_nickname": "Please enter a nickname",
+  "error_nickname_too_long": "Nickname too long",
+  "error_nickname_used": "This nickname is already taken",
+  "error_wrong_password": "Password is incorrect",
+  "error_game_not_found": "The game requested could not be found",
+  "error_game_full": "No more players can join this game",
+  "error_game_in_progress": "Game already in progress",
+  "error_generic": "There was en error"
 }

@@ -16,5 +16,13 @@
   "no": "Non",
   "join_game_dialog_title": "Rejoindre le jeu de %s",
   "password_field_join_game": "Mot de passe",
-  "join_button": "Rejoindre"
+  "join_button": "Rejoindre",
+  "error_no_nickname": "Veuillez saisir un surnom",
+  "error_nickname_too_long": "Surnom trop long",
+  "error_nickname_used": "Ce surnom est déjà pris",
+  "error_wrong_password": "Le mot de passe est incorrect",
+  "error_game_not_found": "Le jeu demandé n'existe pas",
+  "error_game_full": "Aucun autre joueur ne peut participer à ce jeu",
+  "error_game_in_progress": "Ce jeu est déjà en cours",
+  "error_generic": "Une erreur est survenue"
 }

@@ -114,10 +114,11 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                 child: InkWell(
                     onTap: () {
                       if (game.inProgress) {
-                        showErrorMessageSnackBar("Game already in progress");
+                        showErrorMessageSnackBar(
+                            i18n.translate("error_game_in_progress"));
                       } else if (!game.joinable) {
                         showErrorMessageSnackBar(
-                            "No more players can join this game");
+                            i18n.translate("error_game_full"));
                       } else {
                         // The player can access the dialog to enter
                         // nickname and maybe password
@@ -127,7 +128,8 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                           if (data is PopWithResults) {
                             disconnectPlayerAfterLeavingGame(data, context);
                           } else if (data is JoinGameError) {
-                            showErrorMessageSnackBar(data.errorMessage);
+                            showErrorMessageSnackBar(
+                                i18n.translate(data.errorMessageKey));
                           }
                         });
                       }
@@ -217,14 +219,16 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                 String passwordErrorMessage;
                 JoinGameError streamedData = context.watch<JoinGameError>();
                 if (streamedData != null &&
-                    streamedData.errorMessage.isNotEmpty) {
+                    streamedData.errorMessageKey.isNotEmpty) {
                   if (streamedData.errorType ==
                       JoinGameErrorType.NICKNAME_ERROR) {
-                    nicknameErrorMessage = streamedData.errorMessage;
+                    nicknameErrorMessage =
+                        i18n.translate(streamedData.errorMessageKey);
                     passwordErrorMessage = null;
                   } else if (streamedData.errorType ==
                       JoinGameErrorType.PASSWORD_ERROR) {
-                    passwordErrorMessage = streamedData.errorMessage;
+                    passwordErrorMessage =
+                        i18n.translate(streamedData.errorMessageKey);
                     nicknameErrorMessage = null;
                   } else {
                     // OTHER_ERROR
@@ -315,7 +319,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                           } else {
                             print("Error: please enter a nickname");
                             context.read<GamesModel>().showError(
-                                "Please enter a nickname",
+                                "error_no_nickname",
                                 JoinGameErrorType.NICKNAME_ERROR);
                           }
                         },

@@ -59,49 +59,55 @@ class GamesModel {
         case "Please enter a nickname":
           {
             errorType = JoinGameErrorType.NICKNAME_ERROR;
+            errorMessage = "error_no_nickname";
             break;
           }
         case "The chosen nickname is already taken":
           {
             errorType = JoinGameErrorType.NICKNAME_ERROR;
+            errorMessage = "error_nickname_used";
             break;
           }
         case "Password is incorrect":
           {
             errorType = JoinGameErrorType.PASSWORD_ERROR;
+            errorMessage = "error_wrong_password";
             break;
           }
         case "The game requested could not be found":
           {
             errorType = JoinGameErrorType.OTHER_ERROR;
+            errorMessage = "error_game_not_found";
+            break;
+          }
+        case "Please enter a nickname less than 20 characters long":
+          {
+            errorType = JoinGameErrorType.NICKNAME_ERROR;
+            errorMessage = "error_nickname_too_long";
             break;
           }
         // The below errors have been treated before even calling joinGame on socket
         // But we'll put them here anyway
-        case "Please enter a nickname less than 20 characters long":
-          {
-            // Make the errorMessage shorter
-            errorMessage = "Nickname too long";
-            errorType = JoinGameErrorType.NICKNAME_ERROR;
-            break;
-          }
         case "No more players can join this game":
           {
             errorType = JoinGameErrorType.OTHER_ERROR;
+            errorMessage = "error_game_full";
             break;
           }
         case "The game requested is already in progress":
           {
             errorType = JoinGameErrorType.OTHER_ERROR;
+            errorMessage = "error_game_in_progress";
             break;
           }
         default:
           {
             errorType = JoinGameErrorType.OTHER_ERROR;
+            errorMessage = "error_generic";
           }
       }
-      _errorMessageController
-          .add(JoinGameError(errorType: errorType, errorMessage: errorMessage));
+      _errorMessageController.add(
+          JoinGameError(errorType: errorType, errorMessageKey: errorMessage));
     });
 
     // Subscribe to an event to listen to
@@ -124,8 +130,8 @@ class GamesModel {
   }
 
   // Show an error without making a useless call to the socket
-  void showError(String errorMessage, JoinGameErrorType errorType) {
-    _errorMessageController
-        .add(JoinGameError(errorType: errorType, errorMessage: errorMessage));
+  void showError(String errorMessageKey, JoinGameErrorType errorType) {
+    _errorMessageController.add(
+        JoinGameError(errorType: errorType, errorMessageKey: errorMessageKey));
   }
 }
