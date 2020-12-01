@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
+import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
@@ -201,9 +202,17 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     return showDialog(
         context: context,
         builder: (context) {
-          return StreamProvider<JoinGameError>.value(
-              value: Provider.of<GamesModel>(context).errorMessageToStream,
-              builder: (context, child) {
+          return MultiProvider(
+              providers: [
+                StreamProvider<JoinGameError>.value(
+                    value:
+                        Provider.of<GamesModel>(context).errorMessageToStream),
+                StreamProvider<OuistitiGameDetails>.value(
+                    value: Provider.of<GamesModel>(context).currentGameToStream)
+              ],
+              child: Builder(builder: (BuildContext context) {
+                ////// HANDLE STREAMPROVIDERS //////
+                // joinGameError
                 String nicknameErrorMessage;
                 String passwordErrorMessage;
                 JoinGameError streamedData = context.watch<JoinGameError>();
@@ -222,6 +231,26 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                     Navigator.of(context).pop(streamedData);
                   }
                 }
+
+                // joinGameSuccess
+                if (context.watch<OuistitiGameDetails>() != null) {
+                  print("About to enter game");
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    print("Done rebuilding JoinGameAlertDialog");
+                    Navigator.of(context)
+                        .pushNamed(InGameScreen.pageName)
+                        .then((data) {
+                      print(
+                          "Returned to select game screen - close join game dialog");
+                      if (data is PopWithResults) {
+                        print("data is PopWithResults");
+                      }
+                      Navigator.of(context).pop(data);
+                    });
+                  });
+                }
+
+                ////// UI //////
                 return AlertDialog(
                     scrollable: true,
                     title: Text(sprintf(
@@ -289,21 +318,10 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                                 "Please enter a nickname",
                                 JoinGameErrorType.NICKNAME_ERROR);
                           }
-                          /* /////// TEMPORARILY DISABLED ///////
-                      Navigator.of(context)
-                        .pushNamed(InGameScreen.pageName)
-                        .then((data) {
-                      print(
-                          "Returned to select game screen - close join game dialog");
-                      if (data is PopWithResults) {
-                        print("data is PopWithResults");
-                      }
-                      Navigator.of(context).pop(data);
-                    });*/
                         },
                       ),
                     ]);
-              });
+              }));
         },
         barrierDismissible:
             true); // The player can choose to press outside of the alert dialog to not join the game

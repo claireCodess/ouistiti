@@ -21,6 +21,10 @@ class GamesModel {
       new StreamController.broadcast();
   Stream<JoinGameError> get errorMessageToStream =>
       _errorMessageController.stream;
+  StreamController<OuistitiGameDetails> _currentGameController =
+      new StreamController.broadcast();
+  Stream<OuistitiGameDetails> get currentGameToStream =>
+      _currentGameController.stream;
 
   void initSocketAndEstablishConnection() async {
     // Initialising the list of games
@@ -44,6 +48,8 @@ class GamesModel {
     socketIO.on('joinGameSuccess', (data) {
       print("joinGameSuccess");
       currentGame = OuistitiGameDetails.fromMap(data);
+      print("Current game = $currentGame");
+      _currentGameController.add(currentGame);
     });
 
     socketIO.on('joinGameError', (errorMessage) {
