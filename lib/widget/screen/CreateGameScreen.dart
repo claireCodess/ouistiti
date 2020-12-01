@@ -1,10 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
+import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:provider/provider.dart';
+
+import 'InGameScreen.dart';
 
 class CreateGameScreen extends StatefulWidget {
   static final String pageName = "/createGame";
@@ -30,9 +34,18 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         child: Container(
           child: Padding(
             padding: EdgeInsets.only(left: 8, right: 8, top: 12),
-            child: StreamProvider<JoinGameError>.value(
-                value: Provider.of<GamesModel>(context).errorMessageToStream,
-                builder: (context, child) {
+            child: MultiProvider(
+                providers: [
+                  StreamProvider<JoinGameError>.value(
+                      value: Provider.of<GamesModel>(context)
+                          .errorMessageToStream),
+                  StreamProvider<OuistitiGameDetails>.value(
+                      value:
+                          Provider.of<GamesModel>(context).currentGameToStream)
+                ],
+                child: Builder(builder: (BuildContext context) {
+                  ////// HANDLE STREAMPROVIDERS //////
+                  // joinGameError
                   String nicknameErrorMessage;
                   JoinGameError streamedData = context.watch<JoinGameError>();
                   if (streamedData != null &&
@@ -41,6 +54,30 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       streamedData.errorMessage.isNotEmpty) {
                     nicknameErrorMessage = streamedData.errorMessage;
                   }
+
+                  // joinGameSuccess
+                  if (context.watch<OuistitiGameDetails>() != null) {
+                    print("About to enter game");
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      print("Done rebuilding CreateGameScreen");
+                      Navigator.of(context)
+                          .pushNamed(InGameScreen.pageName)
+                          .then((data) {
+                        print("Returned to create game screen");
+                        if (data is PopWithResults) {
+                          print("data is PopWithResults");
+                          PopWithResults popResult = data;
+                          if (popResult.toPage == CreateGameScreen.pageName) {
+                            // ...
+                          } else {
+                            Navigator.of(context).pop(data);
+                          }
+                        }
+                      });
+                    });
+                  }
+
+                  ////// UI //////
                   return Column(
                     children: <Widget>[
                       Padding(
@@ -83,20 +120,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                   .socketIO
                                   .emit('createGame', gameToCreate.toJson());
                               /////// TEMPORARILY DISABLED ///////
-                              /*Navigator.of(context)
-                            .pushNamed(InGameScreen.pageName)
-                            .then((data) {
-                          print("Returned to create game screen");
-                          if (data is PopWithResults) {
-                            print("data is PopWithResults");
-                            PopWithResults popResult = data;
-                            if (popResult.toPage == CreateGameScreen.pageName) {
-                              // ...
-                            } else {
-                              Navigator.of(context).pop(data);
-                            }
-                          }
-                        });*/
+                              /**/
                             } else {
                               print("Error: please enter a nickname");
                               context.read<GamesModel>().showError(
@@ -124,7 +148,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       )
                     ],
                   );
-                }),
+                })),
           ),
         ),
       ),
