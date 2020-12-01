@@ -99,6 +99,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                           controller: passwordTextFieldController,
                           obscureText: true,
                           decoration: InputDecoration(
+                            contentPadding: EdgeInsets.fromLTRB(12, 12, 12, 12),
                             border: OutlineInputBorder(),
                             labelText:
                                 i18n.translate("password_field_create_game"),
