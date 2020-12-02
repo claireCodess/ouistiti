@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/util/PopResult.dart';
@@ -17,6 +18,25 @@ class InGameScreen extends StatefulWidget {
 
 class _InGameScreenState extends State<InGameScreen> {
   AppLocalizations i18n;
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
+  }
+
+  @override
+  dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.portraitUp
+    ]);
+    super.dispose();
+  }
 
   Future<PopWithResults> createLeaveGameAlertDialog(BuildContext context) {
     return showDialog(
