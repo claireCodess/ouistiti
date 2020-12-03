@@ -19,6 +19,13 @@ class InGameScreen extends StatefulWidget {
 class _InGameScreenState extends State<InGameScreen> {
   AppLocalizations i18n;
 
+  // Fonts
+  static const _kFontFam = 'OuistitiApp';
+  static const _kFontPkg = null;
+
+  static const IconData wrench =
+      IconData(0xe867, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+
   @override
   void initState() {
     super.initState();
@@ -73,11 +80,10 @@ class _InGameScreenState extends State<InGameScreen> {
     return WillPopScope(
         child: Scaffold(
           backgroundColor: MaterialColor(0xFF366336, boardColor),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[],
-            ),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[Icon(wrench), Icon(wrench)],
           ),
         ),
         onWillPop: _requestPop);
