@@ -33,6 +33,7 @@ dependencies:
   socket_io_client: ^0.9.11
   provider: ^4.3.2+2
   sprintf: ^5.0.0
+  align_positioned: ^1.2.14
 
 dev_dependencies:
   flutter_test:
@@ -66,6 +67,10 @@ flutter:
   #         Author:    Aristeides Stathopoulos
   #         License:   SIL (http://scripts.sil.org/OFL)
   #         Homepage:  http://aristeides.com/
+  # * Font Awesome 5, Copyright (C) 2016 by Dave Gandy
+  #         Author:    Dave Gandy
+  #         License:   SIL (https://github.com/FortAwesome/Font-Awesome/blob/master/LICENSE.txt)
+  #         Homepage:  http://fortawesome.github.com/Font-Awesome/
   fonts:
     - family: OuistitiApp
       fonts:

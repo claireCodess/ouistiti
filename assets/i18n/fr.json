@@ -24,5 +24,7 @@
   "error_game_not_found": "Le jeu demandé n'existe pas",
   "error_game_full": "Aucun autre joueur ne peut participer à ce jeu",
   "error_game_in_progress": "Ce jeu est déjà en cours",
-  "error_generic": "Une erreur est survenue"
+  "error_generic": "Une erreur est survenue",
+  "waiting_for_players": "En attente de joueurs...",
+  "start_game_button": "Commencer la partie"
 }

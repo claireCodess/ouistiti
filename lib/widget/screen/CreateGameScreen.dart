@@ -121,8 +121,6 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                               Provider.of<GamesModel>(context, listen: false)
                                   .socketIO
                                   .emit('createGame', gameToCreate.toJson());
-                              /////// TEMPORARILY DISABLED ///////
-                              /**/
                             } else {
                               print("Error: please enter a nickname");
                               context.read<GamesModel>().showError(

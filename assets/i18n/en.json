@@ -24,5 +24,7 @@
   "error_game_not_found": "The game requested could not be found",
   "error_game_full": "No more players can join this game",
   "error_game_in_progress": "Game already in progress",
-  "error_generic": "There was en error"
+  "error_generic": "There was en error",
+  "waiting_for_players": "Waiting for players...",
+  "start_game_button": "Start game"
 }

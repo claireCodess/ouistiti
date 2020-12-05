@@ -1,3 +1,4 @@
+import 'package:align_positioned/align_positioned.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -25,6 +26,8 @@ class _InGameScreenState extends State<InGameScreen> {
 
   static const IconData wrench =
       IconData(0xe867, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData door_open =
+      IconData(0xf52b, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 
   @override
   void initState() {
@@ -33,6 +36,7 @@ class _InGameScreenState extends State<InGameScreen> {
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
+    SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
   @override
@@ -42,6 +46,7 @@ class _InGameScreenState extends State<InGameScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.portraitUp
     ]);
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     super.dispose();
   }
 
@@ -80,10 +85,49 @@ class _InGameScreenState extends State<InGameScreen> {
     return WillPopScope(
         child: Scaffold(
           backgroundColor: MaterialColor(0xFF366336, boardColor),
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[Icon(wrench), Icon(wrench)],
+          body: Stack(
+            children: <Widget>[
+              AlignPositioned.relative(
+                  Center(
+                      child: Text(i18n.translate("waiting_for_players"),
+                          style:
+                              TextStyle(color: Colors.white, fontSize: 18.0))),
+                  TextButton(
+                      style: TextButton.styleFrom(
+                          padding: EdgeInsets.only(
+                              top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
+                          backgroundColor: Theme.of(context).primaryColor,
+                          primary: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0))),
+                      child: Text(i18n.translate("start_game_button"),
+                          style:
+                              TextStyle(color: Colors.white, fontSize: 22.0))),
+                  moveByChildHeight: 1.0),
+              Positioned(
+                  top: 16, left: 16, child: Icon(wrench, color: Colors.white)),
+              Positioned(
+                  bottom: 16,
+                  left: 16,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.person, color: Colors.white),
+                        Padding(
+                            padding: EdgeInsets.only(left: 4),
+                            child: Text("Claire",
+                                style: TextStyle(color: Colors.white))),
+                        Padding(
+                            padding: EdgeInsets.only(left: 8),
+                            child:
+                                Icon(Icons.create_sharp, color: Colors.white))
+                      ])),
+              Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: Icon(door_open, color: Colors.white)),
+            ],
           ),
         ),
         onWillPop: _requestPop);
