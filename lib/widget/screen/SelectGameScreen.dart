@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:sprintf/sprintf.dart';
 
 import 'InGameScreen.dart';
+import 'arguments/JoinGameArguments.dart';
 
 class SelectGameScreen extends StatefulWidget {
   SelectGameScreen({Key key}) : super(key: key);
@@ -237,12 +238,16 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                 }
 
                 // joinGameSuccess
-                if (context.watch<OuistitiGameDetails>() != null) {
+                OuistitiGameDetails currentGame =
+                    context.watch<OuistitiGameDetails>();
+                if (currentGame != null) {
                   print("About to enter game");
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     print("Done rebuilding JoinGameAlertDialog");
                     Navigator.of(context)
-                        .pushNamed(InGameScreen.pageName)
+                        .pushNamed(InGameScreen.pageName,
+                            arguments: JoinGameArguments(
+                                currentGame, nicknameTextFieldController.text))
                         .then((data) {
                       print(
                           "Returned to select game screen - close join game dialog");

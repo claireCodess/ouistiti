@@ -9,6 +9,7 @@ import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:provider/provider.dart';
 
 import 'InGameScreen.dart';
+import 'arguments/JoinGameArguments.dart';
 
 class CreateGameScreen extends StatefulWidget {
   static final String pageName = "/createGame";
@@ -57,12 +58,16 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                   }
 
                   // joinGameSuccess
+                  OuistitiGameDetails currentGame =
+                      context.watch<OuistitiGameDetails>();
                   if (context.watch<OuistitiGameDetails>() != null) {
                     print("About to enter game");
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       print("Done rebuilding CreateGameScreen");
                       Navigator.of(context)
-                          .pushNamed(InGameScreen.pageName)
+                          .pushNamed(InGameScreen.pageName,
+                              arguments: JoinGameArguments(currentGame,
+                                  nicknameTextFieldController.text))
                           .then((data) {
                         print("Returned to create game screen");
                         if (data is PopWithResults) {

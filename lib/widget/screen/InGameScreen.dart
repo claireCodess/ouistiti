@@ -1,9 +1,9 @@
 import 'package:align_positioned/align_positioned.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/util/PopResult.dart';
+import 'package:ouistiti/widget/screen/arguments/JoinGameArguments.dart';
 
 import '../../main.dart';
 import 'SelectGameScreen.dart';
@@ -82,6 +82,10 @@ class _InGameScreenState extends State<InGameScreen> {
   @override
   Widget build(BuildContext context) {
     i18n = AppLocalizations.of(context);
+    final JoinGameArguments joinGameArgs =
+        ModalRoute.of(context).settings.arguments;
+    print(joinGameArgs);
+
     return WillPopScope(
         child: Scaffold(
           backgroundColor: MaterialColor(0xFF366336, boardColor),
@@ -116,7 +120,7 @@ class _InGameScreenState extends State<InGameScreen> {
                         Icon(Icons.person, color: Colors.white),
                         Padding(
                             padding: EdgeInsets.only(left: 4),
-                            child: Text("Claire",
+                            child: Text(joinGameArgs.nickname,
                                 style: TextStyle(color: Colors.white))),
                         Padding(
                             padding: EdgeInsets.only(left: 8),
