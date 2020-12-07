@@ -7,16 +7,18 @@ class OuistitiGameDetails {
       {@required this.id,
       @required this.totalCardCount,
       @required this.totalRoundCount,
-      @required this.firstPlayerId,
       @required this.players,
-      @required this.playerIdOrder});
+      @required this.playerIdOrder,
+      @required this.selfId,
+      @required this.hostId});
 
   final String id;
   final int totalCardCount;
   final int totalRoundCount;
-  final String firstPlayerId;
   final List<OuistitiPlayer> players;
   final List<String> playerIdOrder;
+  final String selfId;
+  final String hostId;
 
   static OuistitiGameDetails fromMap(Map<String, dynamic> data) {
     List<OuistitiPlayer> playersList = new List<OuistitiPlayer>();
@@ -28,16 +30,20 @@ class OuistitiGameDetails {
       playerIdOrderList.add(value);
     });
     return OuistitiGameDetails(
-        id: data["id"],
-        totalCardCount: data["totalCardCount"],
-        totalRoundCount: data["totalRoundCount"],
-        firstPlayerId: data["firstPlayerId"],
-        players: playersList, //data["players"].forEach((key, value) {}),
-        playerIdOrder: playerIdOrderList);
+      id: data["id"],
+      totalCardCount: data["totalCardCount"],
+      totalRoundCount: data["totalRoundCount"],
+      players: playersList,
+      playerIdOrder: playerIdOrderList,
+      selfId: data["selfId"],
+      hostId: data["hostId"],
+    );
   }
 
   @override
   String toString() {
-    return "Game ID ${this.id}";
+    return "Details of game with ID: ${this.id}\nTotal card count: ${this.totalCardCount}\n" +
+        "Total round count: ${this.totalRoundCount}\nNumber of players: ${this.players.length}\n" +
+        "selfId: ${this.selfId}\nhostId: ${this.hostId}\n";
   }
 }

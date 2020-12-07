@@ -84,7 +84,9 @@ class _InGameScreenState extends State<InGameScreen> {
     i18n = AppLocalizations.of(context);
     final JoinGameArguments joinGameArgs =
         ModalRoute.of(context).settings.arguments;
-    print(joinGameArgs);
+    bool isHost = joinGameArgs.nickname == "host";
+    // Replace with the following when deployed web version up to date
+    // joinGameArgs.gameDetails.hostId == joinGameArgs.gameDetails.selfId;
 
     return WillPopScope(
         child: Scaffold(
@@ -96,20 +98,29 @@ class _InGameScreenState extends State<InGameScreen> {
                       child: Text(i18n.translate("waiting_for_players"),
                           style:
                               TextStyle(color: Colors.white, fontSize: 18.0))),
-                  TextButton(
-                      style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(
-                              top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
-                          backgroundColor: Theme.of(context).primaryColor,
-                          primary: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0))),
-                      child: Text(i18n.translate("start_game_button"),
-                          style:
-                              TextStyle(color: Colors.white, fontSize: 22.0))),
+                  Visibility(
+                      visible: isHost,
+                      child: TextButton(
+                          style: TextButton.styleFrom(
+                              padding: EdgeInsets.only(
+                                  top: 10.0,
+                                  bottom: 10.0,
+                                  left: 25.0,
+                                  right: 25.0),
+                              backgroundColor: Theme.of(context).primaryColor,
+                              primary: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.0))),
+                          child: Text(i18n.translate("start_game_button"),
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 22.0)))),
                   moveByChildHeight: 1.0),
-              Positioned(
-                  top: 16, left: 16, child: Icon(wrench, color: Colors.white)),
+              Visibility(
+                  visible: isHost,
+                  child: Positioned(
+                      top: 16,
+                      left: 16,
+                      child: Icon(wrench, color: Colors.white))),
               Positioned(
                   bottom: 16,
                   left: 16,
