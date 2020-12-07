@@ -141,7 +141,11 @@ class _InGameScreenState extends State<InGameScreen> {
               Positioned(
                   bottom: 16,
                   right: 16,
-                  child: Icon(door_open, color: Colors.white)),
+                  child: GestureDetector(
+                      child: Icon(door_open, color: Colors.white),
+                      onTap: () {
+                        _requestPop();
+                      })),
             ],
           ),
         ),
