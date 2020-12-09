@@ -26,5 +26,7 @@
   "error_game_in_progress": "Ce jeu est déjà en cours",
   "error_generic": "Une erreur est survenue",
   "waiting_for_players": "En attente de joueurs...",
-  "start_game_button": "Commencer la partie"
+  "start_game_button": "Commencer la partie",
+  "modify_player_info": "Modifier les infos du joueur",
+  "modify_button": "Modifier"
 }

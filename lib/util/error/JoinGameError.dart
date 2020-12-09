@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 
-enum JoinGameErrorType { NICKNAME_ERROR, PASSWORD_ERROR, OTHER_ERROR }
+enum GameConfigErrorType { NICKNAME_ERROR, PASSWORD_ERROR, OTHER_ERROR }
 
 class JoinGameError {
   const JoinGameError(
       {@required this.errorType, @required this.errorMessageKey});
 
-  final JoinGameErrorType errorType;
+  final GameConfigErrorType errorType;
   final String errorMessageKey;
 }

@@ -1,9 +1,15 @@
 import 'package:align_positioned/align_positioned.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ouistiti/dto/OuisitiSetNickname.dart';
+import 'package:ouistiti/dto/OuistitiGetNickname.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
+import 'package:ouistiti/model/GamesModel.dart';
 import 'package:ouistiti/util/PopResult.dart';
+import 'package:ouistiti/util/error/JoinGameError.dart';
+import 'package:ouistiti/util/error/NicknameError.dart';
 import 'package:ouistiti/widget/screen/arguments/JoinGameArguments.dart';
+import 'package:provider/provider.dart';
 
 import '../../main.dart';
 import 'SelectGameScreen.dart';
@@ -85,9 +91,14 @@ class _InGameScreenState extends State<InGameScreen> {
     final JoinGameArguments joinGameArgs =
         ModalRoute.of(context).settings.arguments;
     bool isHost = joinGameArgs.nickname == "host";
+    String nickname = joinGameArgs.nickname;
     // Replace with the following when deployed web version up to date
     // joinGameArgs.gameDetails.hostId == joinGameArgs.gameDetails.selfId;
 
+    /*return Provider<String>.value(
+        value: nickname,
+        builder: (context, _) {
+          */
     return WillPopScope(
         child: Scaffold(
           backgroundColor: MaterialColor(0xFF366336, boardColor),
@@ -131,12 +142,27 @@ class _InGameScreenState extends State<InGameScreen> {
                         Icon(Icons.person, color: Colors.white),
                         Padding(
                             padding: EdgeInsets.only(left: 4),
-                            child: Text(joinGameArgs.nickname,
+                            child: Text(nickname,
                                 style: TextStyle(color: Colors.white))),
                         Padding(
                             padding: EdgeInsets.only(left: 8),
-                            child:
-                                Icon(Icons.create_sharp, color: Colors.white))
+                            child: GestureDetector(
+                                child: Icon(Icons.create_sharp,
+                                    color: Colors.white),
+                                onTap: () {
+                                  createModifyPlayerInfoDialog(
+                                          context,
+                                          /* current nickname */ nickname)
+                                      .then((newNickname) {
+                                    if (newNickname is String) {
+                                      print("Changing nickname in UI");
+                                      setState(() {
+                                        print("Changing nickname in UIIIIII");
+                                        nickname = newNickname;
+                                      });
+                                    }
+                                  });
+                                }))
                       ])),
               Positioned(
                   bottom: 16,
@@ -150,6 +176,7 @@ class _InGameScreenState extends State<InGameScreen> {
           ),
         ),
         onWillPop: _requestPop);
+    //});
   }
 
   Future<bool> _requestPop() {
@@ -163,5 +190,99 @@ class _InGameScreenState extends State<InGameScreen> {
       }
     });
     return new Future.value(false);
+  }
+
+  createModifyPlayerInfoDialog(BuildContext context, String originalNickname) {
+    final nicknameTextFieldController = TextEditingController();
+    nicknameTextFieldController.text = originalNickname;
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return MultiProvider(
+              providers: [
+                StreamProvider<NicknameError>.value(
+                    value: Provider.of<GamesModel>(context)
+                        .nicknameErrorMsgToStream),
+                StreamProvider<OuistitiGetNickname>.value(
+                    value: Provider.of<GamesModel>(context).nicknameToStream)
+              ],
+              child: Builder(builder: (BuildContext context) {
+                ////// HANDLE STREAMPROVIDERS //////
+                // nicknameError
+                String nicknameErrorMessage;
+                NicknameError nicknameErrorDto = context.watch<NicknameError>();
+                if (nicknameErrorDto != null &&
+                    nicknameErrorDto.errorMessageKey.isNotEmpty) {
+                  nicknameErrorMessage =
+                      i18n.translate(nicknameErrorDto.errorMessageKey);
+                }
+
+                // nicknameSuccess
+                OuistitiGetNickname nicknameDto =
+                    context.watch<OuistitiGetNickname>();
+                if (nicknameDto != null) {
+                  print(
+                      "Nickname changed successfully to: ${nicknameDto.newNickname}");
+                  Navigator.of(context).pop(nicknameDto.newNickname);
+                }
+
+                ////// UI //////
+                return AlertDialog(
+                    scrollable: true,
+                    title: Text(i18n.translate("modify_player_info")),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: TextField(
+                              controller: nicknameTextFieldController,
+                              decoration: InputDecoration(
+                                  contentPadding:
+                                      EdgeInsets.fromLTRB(12, 12, 12, 12),
+                                  border: OutlineInputBorder(),
+                                  labelText: i18n.translate("nickname_field"),
+                                  errorText: nicknameErrorMessage),
+                              maxLength: 20,
+                            )),
+                      ],
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.only(
+                              top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
+                          backgroundColor: Theme.of(context).primaryColor,
+                          primary: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0)),
+                        ),
+                        child: Text(
+                          i18n.translate("modify_button"),
+                          style: TextStyle(color: Colors.white, fontSize: 15.0),
+                        ),
+                        onPressed: () {
+                          String nickname = nicknameTextFieldController.text;
+                          if (nickname.isNotEmpty &&
+                              nickname != originalNickname) {
+                            print("Changing nickname to $nickname");
+                            Provider.of<GamesModel>(context, listen: false)
+                                .socketIO
+                                .emit('setNickname',
+                                    OuistitiSetNickname(nickname).toJson());
+                          } else if (nickname.isEmpty) {
+                            print("Error: please enter a nickname");
+                            context.read<GamesModel>().showError(
+                                "error_no_nickname",
+                                GameConfigErrorType.NICKNAME_ERROR);
+                          }
+                        },
+                      ),
+                    ]);
+              }));
+        },
+        barrierDismissible:
+            true); // The player can choose to press outside of the alert dialog to not join the game
   }
 }

@@ -26,5 +26,7 @@
   "error_game_in_progress": "Game already in progress",
   "error_generic": "There was en error",
   "waiting_for_players": "Waiting for players...",
-  "start_game_button": "Start game"
+  "start_game_button": "Start game",
+  "modify_player_info": "Modify player info",
+  "modify_button": "Modify"
 }
