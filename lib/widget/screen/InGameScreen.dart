@@ -36,10 +36,7 @@ class _InGameScreenState extends State<InGameScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-    ]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
@@ -88,10 +85,9 @@ class _InGameScreenState extends State<InGameScreen> {
     i18n = AppLocalizations.of(context);
     final JoinGameArguments joinGameArgs =
         ModalRoute.of(context).settings.arguments;
-    bool isHost = joinGameArgs.nickname == "host";
+    bool isHost =
+        joinGameArgs.gameDetails.hostId == joinGameArgs.gameDetails.selfId;
     String nickname = joinGameArgs.nickname;
-    // Replace with the following when deployed web version up to date
-    // joinGameArgs.gameDetails.hostId == joinGameArgs.gameDetails.selfId;
 
     return StreamProvider<String>(
         create: (_) => Provider.of<GamesModel>(context).nicknameToStream,
