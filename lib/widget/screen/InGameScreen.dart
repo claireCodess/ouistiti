@@ -5,7 +5,6 @@ import 'package:ouistiti/dto/OuisitiSetNickname.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
 import 'package:ouistiti/util/PopResult.dart';
-import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:ouistiti/util/error/NicknameError.dart';
 import 'package:ouistiti/widget/screen/arguments/JoinGameArguments.dart';
 import 'package:provider/provider.dart';
@@ -267,9 +266,9 @@ class _InGameScreenState extends State<InGameScreen> {
                                     OuistitiSetNickname(nickname).toJson());
                           } else if (nickname.isEmpty) {
                             print("Error: please enter a nickname");
-                            context.read<GamesModel>().showError(
-                                "error_no_nickname",
-                                GameConfigErrorType.NICKNAME_ERROR);
+                            context
+                                .read<GamesModel>()
+                                .showNicknameError("error_no_nickname");
                           }
                         },
                       ),

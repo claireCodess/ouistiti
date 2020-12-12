@@ -222,12 +222,12 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                 if (streamedData != null &&
                     streamedData.errorMessageKey.isNotEmpty) {
                   if (streamedData.errorType ==
-                      GameConfigErrorType.NICKNAME_ERROR) {
+                      JoinGameErrorType.NICKNAME_ERROR) {
                     nicknameErrorMessage =
                         i18n.translate(streamedData.errorMessageKey);
                     passwordErrorMessage = null;
                   } else if (streamedData.errorType ==
-                      GameConfigErrorType.PASSWORD_ERROR) {
+                      JoinGameErrorType.PASSWORD_ERROR) {
                     passwordErrorMessage =
                         i18n.translate(streamedData.errorMessageKey);
                     nicknameErrorMessage = null;
@@ -323,9 +323,9 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                                 .emit('joinGame', gameToJoin.toJson());
                           } else {
                             print("Error: please enter a nickname");
-                            context.read<GamesModel>().showError(
+                            context.read<GamesModel>().showJoinGameError(
                                 "error_no_nickname",
-                                GameConfigErrorType.NICKNAME_ERROR);
+                                JoinGameErrorType.NICKNAME_ERROR);
                           }
                         },
                       ),

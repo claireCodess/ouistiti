@@ -51,7 +51,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                   JoinGameError streamedData = context.watch<JoinGameError>();
                   if (streamedData != null &&
                       streamedData.errorType ==
-                          GameConfigErrorType.NICKNAME_ERROR &&
+                          JoinGameErrorType.NICKNAME_ERROR &&
                       streamedData.errorMessageKey.isNotEmpty) {
                     nicknameErrorMessage =
                         i18n.translate(streamedData.errorMessageKey);
@@ -129,9 +129,9 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                   .emit('createGame', gameToCreate.toJson());
                             } else {
                               print("Error: please enter a nickname");
-                              context.read<GamesModel>().showError(
+                              context.read<GamesModel>().showJoinGameError(
                                   "error_no_nickname",
-                                  GameConfigErrorType.NICKNAME_ERROR);
+                                  JoinGameErrorType.NICKNAME_ERROR);
                             }
                           },
                           style: TextButton.styleFrom(
