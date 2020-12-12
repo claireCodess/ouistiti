@@ -2,7 +2,6 @@ import 'package:align_positioned/align_positioned.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ouistiti/dto/OuisitiSetNickname.dart';
-import 'package:ouistiti/dto/OuistitiGetNickname.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/model/GamesModel.dart';
 import 'package:ouistiti/util/PopResult.dart';
@@ -95,88 +94,85 @@ class _InGameScreenState extends State<InGameScreen> {
     // Replace with the following when deployed web version up to date
     // joinGameArgs.gameDetails.hostId == joinGameArgs.gameDetails.selfId;
 
-    /*return Provider<String>.value(
-        value: nickname,
+    return StreamProvider<String>(
+        create: (_) => Provider.of<GamesModel>(context).nicknameToStream,
+        initialData: nickname,
         builder: (context, _) {
-          */
-    return WillPopScope(
-        child: Scaffold(
-          backgroundColor: MaterialColor(0xFF366336, boardColor),
-          body: Stack(
-            children: <Widget>[
-              AlignPositioned.relative(
-                  Center(
-                      child: Text(i18n.translate("waiting_for_players"),
-                          style:
-                              TextStyle(color: Colors.white, fontSize: 18.0))),
-                  Visibility(
-                      visible: isHost,
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                              padding: EdgeInsets.only(
-                                  top: 10.0,
-                                  bottom: 10.0,
-                                  left: 25.0,
-                                  right: 25.0),
-                              backgroundColor: Theme.of(context).primaryColor,
-                              primary: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20.0))),
-                          child: Text(i18n.translate("start_game_button"),
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 22.0)))),
-                  moveByChildHeight: 1.0),
-              Visibility(
-                  visible: isHost,
-                  child: Positioned(
-                      top: 16,
-                      left: 16,
-                      child: Icon(wrench, color: Colors.white))),
-              Positioned(
-                  bottom: 16,
-                  left: 16,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(Icons.person, color: Colors.white),
-                        Padding(
-                            padding: EdgeInsets.only(left: 4),
-                            child: Text(nickname,
-                                style: TextStyle(color: Colors.white))),
-                        Padding(
-                            padding: EdgeInsets.only(left: 8),
-                            child: GestureDetector(
-                                child: Icon(Icons.create_sharp,
-                                    color: Colors.white),
-                                onTap: () {
-                                  createModifyPlayerInfoDialog(
-                                          context,
-                                          /* current nickname */ nickname)
-                                      .then((newNickname) {
-                                    if (newNickname is String) {
-                                      print("Changing nickname in UI");
-                                      setState(() {
-                                        print("Changing nickname in UIIIIII");
-                                        nickname = newNickname;
-                                      });
-                                    }
-                                  });
-                                }))
-                      ])),
-              Positioned(
-                  bottom: 16,
-                  right: 16,
-                  child: GestureDetector(
-                      child: Icon(door_open, color: Colors.white),
-                      onTap: () {
-                        _requestPop();
-                      })),
-            ],
-          ),
-        ),
-        onWillPop: _requestPop);
-    //});
+          return WillPopScope(
+              child: Scaffold(
+                backgroundColor: MaterialColor(0xFF366336, boardColor),
+                body: Stack(
+                  children: <Widget>[
+                    AlignPositioned.relative(
+                        Center(
+                            child: Text(i18n.translate("waiting_for_players"),
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18.0))),
+                        Visibility(
+                            visible: isHost,
+                            child: TextButton(
+                                style: TextButton.styleFrom(
+                                    padding: EdgeInsets.only(
+                                        top: 10.0,
+                                        bottom: 10.0,
+                                        left: 25.0,
+                                        right: 25.0),
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    primary: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20.0))),
+                                child: Text(i18n.translate("start_game_button"),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 22.0)))),
+                        moveByChildHeight: 1.0),
+                    Visibility(
+                        visible: isHost,
+                        child: Positioned(
+                            top: 16,
+                            left: 16,
+                            child: Icon(wrench, color: Colors.white))),
+                    Positioned(
+                        bottom: 16,
+                        left: 16,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.person, color: Colors.white),
+                              Padding(
+                                  padding: EdgeInsets.only(left: 4),
+                                  child: Text(context.watch<String>(),
+                                      style: TextStyle(color: Colors.white))),
+                              Padding(
+                                  padding: EdgeInsets.only(left: 8),
+                                  child: GestureDetector(
+                                      child: Icon(Icons.create_sharp,
+                                          color: Colors.white),
+                                      onTap: () {
+                                        createModifyPlayerInfoDialog(
+                                                context, nickname)
+                                            .then((newNickname) {
+                                          if (newNickname is String) {
+                                            nickname = newNickname;
+                                          }
+                                        });
+                                      }))
+                            ])),
+                    Positioned(
+                        bottom: 16,
+                        right: 16,
+                        child: GestureDetector(
+                            child: Icon(door_open, color: Colors.white),
+                            onTap: () {
+                              _requestPop();
+                            })),
+                  ],
+                ),
+              ),
+              onWillPop: _requestPop);
+        });
   }
 
   Future<bool> _requestPop() {
@@ -204,7 +200,7 @@ class _InGameScreenState extends State<InGameScreen> {
                 StreamProvider<NicknameError>.value(
                     value: Provider.of<GamesModel>(context)
                         .nicknameErrorMsgToStream),
-                StreamProvider<OuistitiGetNickname>.value(
+                StreamProvider<String>.value(
                     value: Provider.of<GamesModel>(context).nicknameToStream)
               ],
               child: Builder(builder: (BuildContext context) {
@@ -219,12 +215,10 @@ class _InGameScreenState extends State<InGameScreen> {
                 }
 
                 // nicknameSuccess
-                OuistitiGetNickname nicknameDto =
-                    context.watch<OuistitiGetNickname>();
-                if (nicknameDto != null) {
-                  print(
-                      "Nickname changed successfully to: ${nicknameDto.newNickname}");
-                  Navigator.of(context).pop(nicknameDto.newNickname);
+                String nickname = context.watch<String>();
+                if (nickname != null) {
+                  print("Nickname changed successfully to: $nickname");
+                  Navigator.of(context).pop(nickname);
                 }
 
                 ////// UI //////

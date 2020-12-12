@@ -31,10 +31,9 @@ class GamesModel {
   Stream<OuistitiGameDetails> get currentGameToStream =>
       _currentGameController.stream;
 
-  StreamController<OuistitiGetNickname> _nicknameController =
+  StreamController<String> _nicknameController =
       new StreamController.broadcast();
-  Stream<OuistitiGetNickname> get nicknameToStream =>
-      _nicknameController.stream;
+  Stream<String> get nicknameToStream => _nicknameController.stream;
 
   StreamController<NicknameError> _nicknameErrorMsgController =
       new StreamController.broadcast();
@@ -130,7 +129,7 @@ class GamesModel {
       nickname = OuistitiGetNickname.fromMap(data);
       print(
           "Nickname for player with ID ${nickname.id} changed from ${nickname.oldNickname} to ${nickname.newNickname}");
-      _nicknameController.add(nickname);
+      _nicknameController.add(nickname.newNickname);
     });
 
     socketIO.on('nicknameError', (errorMessage) {
