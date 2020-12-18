@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:ouistiti/util/color/MaterialColorGenerator.dart';
 import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:ouistiti/widget/screen/InGameScreen.dart';
 import 'package:ouistiti/widget/screen/SelectGameScreen.dart';
 import 'package:provider/provider.dart';
-
-import 'file:///C:/Utilisateurs/A670729/Documents/Perso/ouistiti/lib/util/color/MaterialColorGenerator.dart';
 
 import 'i18n/AppLocalizations.dart';
 import 'model/GamesModel.dart';
