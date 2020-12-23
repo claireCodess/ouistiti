@@ -146,7 +146,7 @@ packages:
       name: socket_io_client
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.11"
+    version: "0.9.12"
   socket_io_common:
     dependency: transitive
     description:
