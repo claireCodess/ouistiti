@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
-import 'package:ouistiti/model/GamesModel.dart';
+import 'package:ouistiti/socket/Socket.dart';
 import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/util/error/JoinGameError.dart';
+import 'package:ouistiti/viewmodel/JoinGameViewModel.dart';
 import 'package:provider/provider.dart';
 
 import 'InGameScreen.dart';
@@ -37,25 +38,24 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
             padding: EdgeInsets.only(left: 8, right: 8, top: 12),
             child: MultiProvider(
                 providers: [
-                  StreamProvider<JoinGameError>.value(
-                      value: Provider.of<GamesModel>(context)
-                          .errorMessageToStream),
+                  ChangeNotifierProvider<JoinGameViewModel>.value(
+                      value: JoinGameViewModel(socket: Provider.of<Socket>(context))),
                   StreamProvider<OuistitiGameDetails>.value(
                       value:
-                          Provider.of<GamesModel>(context).currentGameToStream)
+                          Provider.of<Socket>(context).currentGameToStream)
                 ],
                 child: Builder(builder: (BuildContext context) {
                   ////// HANDLE STREAMPROVIDERS //////
                   // joinGameError
                   String nicknameErrorMessage;
-                  JoinGameError streamedData = context.watch<JoinGameError>();
-                  if (streamedData != null &&
-                      streamedData.errorType ==
+                  JoinGameError error = context.select((JoinGameViewModel vm) => vm.joinGameError);
+                  if (error != null &&
+                      error.errorType ==
                           JoinGameErrorType.NICKNAME_ERROR &&
-                      streamedData.errorMessageKey.isNotEmpty) {
+                      error.errorMessageKey.isNotEmpty) {
                     nicknameErrorMessage =
-                        i18n.translate(streamedData.errorMessageKey);
-                    print("nicknameErrorMessage: $nicknameErrorMessage");
+                        i18n.translate(error.errorMessageKey);
+                    print("joinGameError: nicknameErrorMessage: $nicknameErrorMessage");
                   }
 
                   // joinGameSuccess
@@ -124,12 +124,12 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                       password:
                                           passwordTextFieldController.text);
                               print("Create game");
-                              Provider.of<GamesModel>(context, listen: false)
+                              Provider.of<Socket>(context, listen: false)
                                   .socketIO
                                   .emit('createGame', gameToCreate.toJson());
                             } else {
                               print("Error: please enter a nickname");
-                              context.read<GamesModel>().showJoinGameError(
+                              context.read<JoinGameViewModel>().showJoinGameError(
                                   "error_no_nickname",
                                   JoinGameErrorType.NICKNAME_ERROR);
                             }

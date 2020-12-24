@@ -7,7 +7,7 @@ import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:ouistiti/util/error/NicknameError.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class GamesModel {
+class Socket {
   IO.Socket socketIO;
 
   // Raw data
@@ -21,9 +21,9 @@ class GamesModel {
   Stream<List<OuistitiGame>> get listGamesToStream =>
       _listGamesController.stream;
 
-  StreamController<JoinGameError> _errorMessageController =
+  StreamController<String> _errorMessageController =
       new StreamController.broadcast();
-  Stream<JoinGameError> get errorMessageToStream =>
+  Stream<String> get errorMessageToStream =>
       _errorMessageController.stream;
 
   StreamController<OuistitiGameDetails> _currentGameController =
@@ -41,6 +41,8 @@ class GamesModel {
       _nicknameErrorMsgController.stream;
 
   void initSocketAndEstablishConnection() async {
+    print("Begin initSocketAndEstablishConnection");
+
     // Initialising the list of games
     listGames = List<OuistitiGame>();
 
@@ -50,7 +52,7 @@ class GamesModel {
       'autoconnect': false
     });
 
-    // Triggers when the websocket connection to the backend has successfully established
+    // Triggers when the websocket connection to the backend has been successfully established
     socketIO.on('connect', (_) {
       print("Socket connected");
     });
@@ -66,62 +68,9 @@ class GamesModel {
       _currentGameController.add(currentGame);
     });
 
-    socketIO.on('joinGameError', (errorMessage) {
-      print("joinGameError: $errorMessage");
-      JoinGameErrorType errorType;
-      switch (errorMessage) {
-        case "Please enter a nickname":
-          {
-            errorType = JoinGameErrorType.NICKNAME_ERROR;
-            errorMessage = "error_no_nickname";
-            break;
-          }
-        case "The chosen nickname is already taken":
-          {
-            errorType = JoinGameErrorType.NICKNAME_ERROR;
-            errorMessage = "error_nickname_used";
-            break;
-          }
-        case "Password is incorrect":
-          {
-            errorType = JoinGameErrorType.PASSWORD_ERROR;
-            errorMessage = "error_wrong_password";
-            break;
-          }
-        case "The game requested could not be found":
-          {
-            errorType = JoinGameErrorType.OTHER_ERROR;
-            errorMessage = "error_game_not_found";
-            break;
-          }
-        case "Please enter a nickname less than 20 characters long":
-          {
-            errorType = JoinGameErrorType.NICKNAME_ERROR;
-            errorMessage = "error_nickname_too_long";
-            break;
-          }
-        // The below errors have been treated before even calling joinGame on socket
-        // But we'll put them here anyway
-        case "No more players can join this game":
-          {
-            errorType = JoinGameErrorType.OTHER_ERROR;
-            errorMessage = "error_game_full";
-            break;
-          }
-        case "The game requested is already in progress":
-          {
-            errorType = JoinGameErrorType.OTHER_ERROR;
-            errorMessage = "error_game_in_progress";
-            break;
-          }
-        default:
-          {
-            errorType = JoinGameErrorType.OTHER_ERROR;
-            errorMessage = "error_generic";
-          }
-      }
-      _errorMessageController.add(
-          JoinGameError(errorType: errorType, errorMessageKey: errorMessage));
+    socketIO.on('joinGameError', (error) {
+      print("joinGameError event received: $error");
+      _errorMessageController.add(error);
     });
 
     socketIO.on('setNickname', (data) {
@@ -171,12 +120,7 @@ class GamesModel {
 
     // Connect to the socket
     socketIO.connect();
-  }
-
-  // Show an error without making a useless call to the socket
-  void showJoinGameError(String errorMessageKey, JoinGameErrorType errorType) {
-    _errorMessageController.add(
-        JoinGameError(errorType: errorType, errorMessageKey: errorMessageKey));
+    print("End initSocketAndEstablishConnection");
   }
 
   // Show an error without making a useless call to the socket

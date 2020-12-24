@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ouistiti/dto/OuisitiSetNickname.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
-import 'package:ouistiti/model/GamesModel.dart';
+import 'package:ouistiti/socket/Socket.dart';
 import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/util/error/NicknameError.dart';
 import 'package:ouistiti/widget/screen/arguments/JoinGameArguments.dart';
@@ -90,7 +90,7 @@ class _InGameScreenState extends State<InGameScreen> {
     String nickname = joinGameArgs.nickname;
 
     return StreamProvider<String>(
-        create: (_) => Provider.of<GamesModel>(context).nicknameToStream,
+        create: (_) => Provider.of<Socket>(context).nicknameToStream,
         initialData: nickname,
         builder: (context, _) {
           return WillPopScope(
@@ -193,10 +193,10 @@ class _InGameScreenState extends State<InGameScreen> {
           return MultiProvider(
               providers: [
                 StreamProvider<NicknameError>.value(
-                    value: Provider.of<GamesModel>(context)
+                    value: Provider.of<Socket>(context)
                         .nicknameErrorMsgToStream),
                 StreamProvider<String>.value(
-                    value: Provider.of<GamesModel>(context).nicknameToStream)
+                    value: Provider.of<Socket>(context).nicknameToStream)
               ],
               child: Builder(builder: (BuildContext context) {
                 ////// HANDLE STREAMPROVIDERS //////
@@ -256,14 +256,14 @@ class _InGameScreenState extends State<InGameScreen> {
                           if (nickname.isNotEmpty &&
                               nickname != originalNickname) {
                             print("Changing nickname to $nickname");
-                            Provider.of<GamesModel>(context, listen: false)
+                            Provider.of<Socket>(context, listen: false)
                                 .socketIO
                                 .emit('setNickname',
                                     OuistitiSetNickname(nickname).toJson());
                           } else if (nickname.isEmpty) {
                             print("Error: please enter a nickname");
                             context
-                                .read<GamesModel>()
+                                .read<Socket>()
                                 .showNicknameError("error_no_nickname");
                           }
                         },

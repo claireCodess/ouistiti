@@ -8,11 +8,11 @@ import 'package:ouistiti/widget/screen/SelectGameScreen.dart';
 import 'package:provider/provider.dart';
 
 import 'i18n/AppLocalizations.dart';
-import 'model/GamesModel.dart';
+import 'socket/Socket.dart';
 
 void main() {
   runApp(
-      Provider<GamesModel>(create: (_) => GamesModel(), child: OuistitiApp()));
+      Provider<Socket>(create: (_) => Socket(), child: OuistitiApp()));
 }
 
 Map<int, Color> boardColor = {

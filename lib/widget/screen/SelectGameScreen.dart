@@ -4,9 +4,10 @@ import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
-import 'package:ouistiti/model/GamesModel.dart';
+import 'package:ouistiti/socket/Socket.dart';
 import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/util/error/JoinGameError.dart';
+import 'package:ouistiti/viewmodel/JoinGameViewModel.dart';
 import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:sprintf/sprintf.dart';
@@ -37,7 +38,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print("Done loading widget");
-      Provider.of<GamesModel>(context, listen: false)
+      Provider.of<Socket>(context, listen: false)
           .initSocketAndEstablishConnection();
     });
   }
@@ -60,7 +61,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
       ),
       body: Center(
           child: StreamProvider<List<OuistitiGame>>.value(
-              value: Provider.of<GamesModel>(context).listGamesToStream,
+              value: Provider.of<Socket>(context).listGamesToStream,
               builder: (context, child) {
                 print("Need to rebuild");
                 List<OuistitiGame> listGames =
@@ -177,8 +178,8 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
         if (popResult.fromPage == InGameScreen.pageName) {
           // For the moment, disconnect to "force leave game"
           // and then reconnect.
-          Provider.of<GamesModel>(context, listen: false).socketIO.disconnect();
-          Provider.of<GamesModel>(context, listen: false).socketIO.connect();
+          Provider.of<Socket>(context, listen: false).socketIO.disconnect();
+          Provider.of<Socket>(context, listen: false).socketIO.connect();
         }
       }
     }
@@ -207,33 +208,32 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
         builder: (context) {
           return MultiProvider(
               providers: [
-                StreamProvider<JoinGameError>.value(
-                    value:
-                        Provider.of<GamesModel>(context).errorMessageToStream),
+                ChangeNotifierProvider<JoinGameViewModel>.value(
+                    value: JoinGameViewModel(socket: Provider.of<Socket>(context))),
                 StreamProvider<OuistitiGameDetails>.value(
-                    value: Provider.of<GamesModel>(context).currentGameToStream)
+                    value: Provider.of<Socket>(context).currentGameToStream)
               ],
               child: Builder(builder: (BuildContext context) {
                 ////// HANDLE STREAMPROVIDERS //////
                 // joinGameError
                 String nicknameErrorMessage;
                 String passwordErrorMessage;
-                JoinGameError streamedData = context.watch<JoinGameError>();
-                if (streamedData != null &&
-                    streamedData.errorMessageKey.isNotEmpty) {
-                  if (streamedData.errorType ==
+                JoinGameError error = context.select((JoinGameViewModel vm) => vm.joinGameError);
+                if (error != null &&
+                    error.errorMessageKey.isNotEmpty) {
+                  if (error.errorType ==
                       JoinGameErrorType.NICKNAME_ERROR) {
                     nicknameErrorMessage =
-                        i18n.translate(streamedData.errorMessageKey);
+                        i18n.translate(error.errorMessageKey);
                     passwordErrorMessage = null;
-                  } else if (streamedData.errorType ==
+                  } else if (error.errorType ==
                       JoinGameErrorType.PASSWORD_ERROR) {
                     passwordErrorMessage =
-                        i18n.translate(streamedData.errorMessageKey);
+                        i18n.translate(error.errorMessageKey);
                     nicknameErrorMessage = null;
                   } else {
                     // OTHER_ERROR
-                    Navigator.of(context).pop(streamedData);
+                    Navigator.of(context).pop(error);
                   }
                 }
 
@@ -318,12 +318,12 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
                                     nickname: nicknameTextFieldController.text,
                                     password: passwordTextFieldController.text);
                             print("Join game");
-                            Provider.of<GamesModel>(context, listen: false)
+                            Provider.of<Socket>(context, listen: false)
                                 .socketIO
                                 .emit('joinGame', gameToJoin.toJson());
                           } else {
                             print("Error: please enter a nickname");
-                            context.read<GamesModel>().showJoinGameError(
+                            context.read<JoinGameViewModel>().showJoinGameError(
                                 "error_no_nickname",
                                 JoinGameErrorType.NICKNAME_ERROR);
                           }
