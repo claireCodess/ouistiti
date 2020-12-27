@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:ouistiti/di/Injection.dart';
 import 'package:ouistiti/util/color/MaterialColorGenerator.dart';
 import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:ouistiti/widget/screen/InGameScreen.dart';
@@ -11,6 +12,7 @@ import 'i18n/AppLocalizations.dart';
 import 'socket/Socket.dart';
 
 void main() {
+  configureInjection();
   runApp(
       Provider<Socket>(create: (_) => Socket(), child: OuistitiApp()));
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ouistiti/di/Injection.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
@@ -8,6 +9,7 @@ import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:ouistiti/viewmodel/JoinGameViewModel.dart';
 import 'package:provider/provider.dart';
+import 'package:stacked/stacked.dart';
 
 import 'InGameScreen.dart';
 import 'arguments/JoinGameArguments.dart';
@@ -36,19 +38,14 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         child: Container(
           child: Padding(
             padding: EdgeInsets.only(left: 8, right: 8, top: 12),
-            child: MultiProvider(
-                providers: [
-                  ChangeNotifierProvider<JoinGameViewModel>.value(
-                      value: JoinGameViewModel(socket: Provider.of<Socket>(context))),
-                  StreamProvider<OuistitiGameDetails>.value(
-                      value:
-                          Provider.of<Socket>(context).currentGameToStream)
-                ],
-                child: Builder(builder: (BuildContext context) {
+            child: /*ChangeNotifierProvider<JoinGameViewModel>.value(
+                      value: getIt<JoinGameViewModel>(), builder: (context, _) {*/
+              ViewModelBuilder<JoinGameViewModel>.reactive(
+                  builder: (context, model, child) {
                   ////// HANDLE STREAMPROVIDERS //////
                   // joinGameError
                   String nicknameErrorMessage;
-                  JoinGameError error = context.select((JoinGameViewModel vm) => vm.joinGameError);
+                  JoinGameError error = model.joinGameError;//context.select((JoinGameViewModel vm) => vm.joinGameError);
                   if (error != null &&
                       error.errorType ==
                           JoinGameErrorType.NICKNAME_ERROR &&
@@ -59,15 +56,14 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                   }
 
                   // joinGameSuccess
-                  OuistitiGameDetails currentGame =
-                      context.watch<OuistitiGameDetails>();
-                  if (context.watch<OuistitiGameDetails>() != null) {
+                  OuistitiGameDetails chosenGame = model.chosenGame;//context.select((JoinGameViewModel vm) => vm.chosenGame);
+                  if (chosenGame != null) {
                     print("About to enter game");
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       print("Done rebuilding CreateGameScreen");
                       Navigator.of(context)
                           .pushNamed(InGameScreen.pageName,
-                              arguments: JoinGameArguments(currentGame,
+                              arguments: JoinGameArguments(chosenGame,
                                   nicknameTextFieldController.text))
                           .then((data) {
                         print("Returned to create game screen");
@@ -124,12 +120,12 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                       password:
                                           passwordTextFieldController.text);
                               print("Create game");
-                              Provider.of<Socket>(context, listen: false)
+                              getIt<Socket>()
                                   .socketIO
                                   .emit('createGame', gameToCreate.toJson());
                             } else {
                               print("Error: please enter a nickname");
-                              context.read<JoinGameViewModel>().showJoinGameError(
+                              /*context.read<JoinGameViewModel>()*/model.showJoinGameError(
                                   "error_no_nickname",
                                   JoinGameErrorType.NICKNAME_ERROR);
                             }
@@ -154,7 +150,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       )
                     ],
                   );
-                })),
+                }, viewModelBuilder: () => getIt<JoinGameViewModel>()),
           ),
         ),
       ),

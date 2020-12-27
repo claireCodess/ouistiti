@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ouistiti/di/Injection.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
@@ -9,8 +10,8 @@ import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:ouistiti/viewmodel/JoinGameViewModel.dart';
 import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
-import 'package:provider/provider.dart';
 import 'package:sprintf/sprintf.dart';
+import 'package:stacked/stacked.dart';
 
 import 'InGameScreen.dart';
 import 'arguments/JoinGameArguments.dart';
@@ -38,8 +39,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print("Done loading widget");
-      Provider.of<Socket>(context, listen: false)
-          .initSocketAndEstablishConnection();
+      getIt<Socket>().initSocketAndEstablishConnection();
     });
   }
 
@@ -60,23 +60,29 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
         title: Text(i18n.translate("select_game_title")),
       ),
       body: Center(
-          child: StreamProvider<List<OuistitiGame>>.value(
-              value: Provider.of<Socket>(context).listGamesToStream,
-              builder: (context, child) {
-                print("Need to rebuild");
-                List<OuistitiGame> listGames =
-                    context.watch<List<OuistitiGame>>();
-                if (listGames != null) {
-                  return Container(
-                    padding: EdgeInsets.only(top: 20),
-                    height: height,
-                    width: width,
-                    child: buildListGames(listGames),
-                  );
-                } else {
-                  return buildLoading();
-                }
-              })),
+          child:
+              /* ChangeNotifierProvider<JoinGameViewModel>.value(
+              value: getIt<JoinGameViewModel>(), builder: (context, _) {*/
+              ViewModelBuilder<JoinGameViewModel>.reactive(
+                  builder: (context, model, child) {
+                    print("Need to rebuild");
+                    List<OuistitiGame> listGames = model
+                        .listGames; //context.select((JoinGameViewModel vm) => vm.listGames);
+                    if (listGames != null) {
+                      print(
+                          "Rebuild UI with ${listGames.length} games in the list");
+                      return Container(
+                        padding: EdgeInsets.only(top: 20),
+                        height: height,
+                        width: width,
+                        child: buildListGames(listGames),
+                      );
+                    } else {
+                      print("Rebuild UI with a null list");
+                      return buildLoading();
+                    }
+                  },
+                  viewModelBuilder: () => getIt<JoinGameViewModel>())),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).primaryColorDark,
         onPressed: () {
@@ -178,8 +184,8 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
         if (popResult.fromPage == InGameScreen.pageName) {
           // For the moment, disconnect to "force leave game"
           // and then reconnect.
-          Provider.of<Socket>(context, listen: false).socketIO.disconnect();
-          Provider.of<Socket>(context, listen: false).socketIO.connect();
+          getIt<Socket>().socketIO.disconnect();
+          getIt<Socket>().socketIO.connect();
         }
       }
     }
@@ -206,131 +212,140 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     return showDialog(
         context: context,
         builder: (context) {
-          return MultiProvider(
+          return /*MultiProvider(
               providers: [
                 ChangeNotifierProvider<JoinGameViewModel>.value(
-                    value: JoinGameViewModel(socket: Provider.of<Socket>(context))),
+                    value: getIt<JoinGameViewModel>()),
                 StreamProvider<OuistitiGameDetails>.value(
-                    value: Provider.of<Socket>(context).currentGameToStream)
+                    value: getIt<Socket>().chosenGameToStream)
               ],
-              child: Builder(builder: (BuildContext context) {
-                ////// HANDLE STREAMPROVIDERS //////
-                // joinGameError
-                String nicknameErrorMessage;
-                String passwordErrorMessage;
-                JoinGameError error = context.select((JoinGameViewModel vm) => vm.joinGameError);
-                if (error != null &&
-                    error.errorMessageKey.isNotEmpty) {
-                  if (error.errorType ==
-                      JoinGameErrorType.NICKNAME_ERROR) {
-                    nicknameErrorMessage =
-                        i18n.translate(error.errorMessageKey);
-                    passwordErrorMessage = null;
-                  } else if (error.errorType ==
-                      JoinGameErrorType.PASSWORD_ERROR) {
-                    passwordErrorMessage =
-                        i18n.translate(error.errorMessageKey);
-                    nicknameErrorMessage = null;
-                  } else {
-                    // OTHER_ERROR
-                    Navigator.of(context).pop(error);
-                  }
-                }
-
-                // joinGameSuccess
-                OuistitiGameDetails currentGame =
-                    context.watch<OuistitiGameDetails>();
-                if (currentGame != null) {
-                  print("About to enter game");
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    print("Done rebuilding JoinGameAlertDialog");
-                    Navigator.of(context)
-                        .pushNamed(InGameScreen.pageName,
-                            arguments: JoinGameArguments(
-                                currentGame, nicknameTextFieldController.text))
-                        .then((data) {
-                      print(
-                          "Returned to select game screen - close join game dialog");
-                      if (data is PopWithResults) {
-                        print("data is PopWithResults");
+              child: Builder(builder: (BuildContext context) {*/
+              ViewModelBuilder<JoinGameViewModel>.reactive(
+                  builder: (context, model, child) {
+                    ////// HANDLE STREAMPROVIDERS //////
+                    // joinGameError
+                    String nicknameErrorMessage;
+                    String passwordErrorMessage;
+                    JoinGameError error = model
+                        .joinGameError; //context.select((JoinGameViewModel vm) => vm.joinGameError);
+                    if (error != null && error.errorMessageKey.isNotEmpty) {
+                      if (error.errorType == JoinGameErrorType.NICKNAME_ERROR) {
+                        nicknameErrorMessage =
+                            i18n.translate(error.errorMessageKey);
+                        passwordErrorMessage = null;
+                      } else if (error.errorType ==
+                          JoinGameErrorType.PASSWORD_ERROR) {
+                        passwordErrorMessage =
+                            i18n.translate(error.errorMessageKey);
+                        nicknameErrorMessage = null;
+                      } else {
+                        // OTHER_ERROR
+                        Navigator.of(context).pop(error);
                       }
-                      Navigator.of(context).pop(data);
-                    });
-                  });
-                }
+                    }
 
-                ////// UI //////
-                return AlertDialog(
-                    scrollable: true,
-                    title: Text(sprintf(
-                        i18n.translate("join_game_dialog_title"),
-                        [hostNickname])),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Padding(
-                            padding: EdgeInsets.only(bottom: 8),
-                            child: TextField(
-                              controller: nicknameTextFieldController,
-                              decoration: InputDecoration(
-                                  contentPadding:
-                                      EdgeInsets.fromLTRB(12, 12, 12, 12),
-                                  border: OutlineInputBorder(),
-                                  labelText: i18n.translate("nickname_field"),
-                                  errorText: nicknameErrorMessage),
-                              maxLength: 20,
-                            )),
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 8),
-                          child: TextField(
-                            controller: passwordTextFieldController,
-                            obscureText: true,
-                            decoration: InputDecoration(
-                                contentPadding:
-                                    EdgeInsets.fromLTRB(12, 12, 12, 12),
-                                border: OutlineInputBorder(),
-                                labelText:
-                                    i18n.translate("password_field_join_game"),
-                                errorText: passwordErrorMessage),
-                          ),
-                        ),
-                      ],
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(
-                              top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
-                          backgroundColor: Theme.of(context).primaryColor,
-                          primary: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0)),
-                        ),
-                        child: Text(
-                          i18n.translate("join_button"),
-                          style: TextStyle(color: Colors.white, fontSize: 15.0),
-                        ),
-                        onPressed: () {
-                          if (nicknameTextFieldController.text.isNotEmpty) {
-                            OuistitiGameToCreateOrJoin gameToJoin =
-                                OuistitiGameToCreateOrJoin(
-                                    id: gameId,
-                                    nickname: nicknameTextFieldController.text,
-                                    password: passwordTextFieldController.text);
-                            print("Join game");
-                            Provider.of<Socket>(context, listen: false)
-                                .socketIO
-                                .emit('joinGame', gameToJoin.toJson());
-                          } else {
-                            print("Error: please enter a nickname");
-                            context.read<JoinGameViewModel>().showJoinGameError(
-                                "error_no_nickname",
-                                JoinGameErrorType.NICKNAME_ERROR);
+                    // joinGameSuccess
+                    OuistitiGameDetails chosenGame = model
+                        .chosenGame; //context.select((JoinGameViewModel vm) => vm.chosenGame);
+                    if (chosenGame != null) {
+                      print("About to enter game");
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        print("Done rebuilding JoinGameAlertDialog");
+                        Navigator.of(context)
+                            .pushNamed(InGameScreen.pageName,
+                                arguments: JoinGameArguments(chosenGame,
+                                    nicknameTextFieldController.text))
+                            .then((data) {
+                          print(
+                              "Returned to select game screen - close join game dialog");
+                          if (data is PopWithResults) {
+                            print("data is PopWithResults");
                           }
-                        },
-                      ),
-                    ]);
-              }));
+                          Navigator.of(context).pop(data);
+                        });
+                      });
+                    }
+
+                    ////// UI //////
+                    return AlertDialog(
+                        scrollable: true,
+                        title: Text(sprintf(
+                            i18n.translate("join_game_dialog_title"),
+                            [hostNickname])),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Padding(
+                                padding: EdgeInsets.only(bottom: 8),
+                                child: TextField(
+                                  controller: nicknameTextFieldController,
+                                  decoration: InputDecoration(
+                                      contentPadding:
+                                          EdgeInsets.fromLTRB(12, 12, 12, 12),
+                                      border: OutlineInputBorder(),
+                                      labelText:
+                                          i18n.translate("nickname_field"),
+                                      errorText: nicknameErrorMessage),
+                                  maxLength: 20,
+                                )),
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 8),
+                              child: TextField(
+                                controller: passwordTextFieldController,
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                    contentPadding:
+                                        EdgeInsets.fromLTRB(12, 12, 12, 12),
+                                    border: OutlineInputBorder(),
+                                    labelText: i18n
+                                        .translate("password_field_join_game"),
+                                    errorText: passwordErrorMessage),
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.only(
+                                  top: 10.0,
+                                  bottom: 10.0,
+                                  left: 25.0,
+                                  right: 25.0),
+                              backgroundColor: Theme.of(context).primaryColor,
+                              primary: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.0)),
+                            ),
+                            child: Text(
+                              i18n.translate("join_button"),
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 15.0),
+                            ),
+                            onPressed: () {
+                              if (nicknameTextFieldController.text.isNotEmpty) {
+                                OuistitiGameToCreateOrJoin gameToJoin =
+                                    OuistitiGameToCreateOrJoin(
+                                        id: gameId,
+                                        nickname:
+                                            nicknameTextFieldController.text,
+                                        password:
+                                            passwordTextFieldController.text);
+                                print("Join game");
+                                getIt<Socket>()
+                                    .socketIO
+                                    .emit('joinGame', gameToJoin.toJson());
+                              } else {
+                                print("Error: please enter a nickname");
+                                /*context.read<JoinGameViewModel>()*/ model
+                                    .showJoinGameError("error_no_nickname",
+                                        JoinGameErrorType.NICKNAME_ERROR);
+                              }
+                            },
+                          ),
+                        ]);
+                  },
+                  viewModelBuilder: () => getIt<JoinGameViewModel>());
         },
         barrierDismissible:
             true); // The player can choose to press outside of the alert dialog to not join the game

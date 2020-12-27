@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:injectable/injectable.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGetNickname.dart';
@@ -7,6 +8,7 @@ import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:ouistiti/util/error/NicknameError.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+@lazySingleton
 class Socket {
   IO.Socket socketIO;
 
@@ -16,20 +18,20 @@ class Socket {
   OuistitiGetNickname nickname;
 
   // Streams and StreamControllers
-  StreamController<List<OuistitiGame>> _listGamesController =
-      new StreamController();
+
+  // JoinGameViewModel start
+  StreamController<List<OuistitiGame>> _listGamesController;
   Stream<List<OuistitiGame>> get listGamesToStream =>
       _listGamesController.stream;
 
-  StreamController<String> _errorMessageController =
-      new StreamController.broadcast();
+  StreamController<String> _errorMessageController;
   Stream<String> get errorMessageToStream =>
       _errorMessageController.stream;
 
-  StreamController<OuistitiGameDetails> _currentGameController =
-      new StreamController.broadcast();
-  Stream<OuistitiGameDetails> get currentGameToStream =>
-      _currentGameController.stream;
+  StreamController<OuistitiGameDetails> _chosenGameController;
+  Stream<OuistitiGameDetails> get chosenGameToStream =>
+      _chosenGameController.stream;
+  // JoinGameViewModel end
 
   StreamController<String> _nicknameController =
       new StreamController.broadcast();
@@ -39,6 +41,14 @@ class Socket {
       new StreamController.broadcast();
   Stream<NicknameError> get nicknameErrorMsgToStream =>
       _nicknameErrorMsgController.stream;
+
+  Socket() {
+    print("In Socket constructor, hash code:");
+    print(this.hashCode);
+    _listGamesController = new StreamController.broadcast();
+    _errorMessageController = new StreamController.broadcast();
+    _chosenGameController = new StreamController.broadcast();
+  }
 
   void initSocketAndEstablishConnection() async {
     print("Begin initSocketAndEstablishConnection");
@@ -65,7 +75,7 @@ class Socket {
       print("joinGameSuccess");
       currentGame = OuistitiGameDetails.fromMap(data);
       print("Current game = $currentGame");
-      _currentGameController.add(currentGame);
+      _chosenGameController.add(currentGame);
     });
 
     socketIO.on('joinGameError', (error) {
@@ -116,6 +126,11 @@ class Socket {
       }
       print("Add to controller the new list of games");
       _listGamesController.add(listGames);
+      if(this._listGamesController.hasListener) {
+        print("_listGamesController has listener");
+      } else {
+        print("_listGamesController has NO listener");
+      }
     });
 
     // Connect to the socket

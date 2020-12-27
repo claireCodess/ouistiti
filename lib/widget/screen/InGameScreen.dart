@@ -1,6 +1,7 @@
 import 'package:align_positioned/align_positioned.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ouistiti/di/Injection.dart';
 import 'package:ouistiti/dto/OuisitiSetNickname.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/socket/Socket.dart';
@@ -90,7 +91,7 @@ class _InGameScreenState extends State<InGameScreen> {
     String nickname = joinGameArgs.nickname;
 
     return StreamProvider<String>(
-        create: (_) => Provider.of<Socket>(context).nicknameToStream,
+        create: (_) => getIt<Socket>().nicknameToStream,
         initialData: nickname,
         builder: (context, _) {
           return WillPopScope(
@@ -193,10 +194,10 @@ class _InGameScreenState extends State<InGameScreen> {
           return MultiProvider(
               providers: [
                 StreamProvider<NicknameError>.value(
-                    value: Provider.of<Socket>(context)
+                    value: getIt<Socket>()
                         .nicknameErrorMsgToStream),
                 StreamProvider<String>.value(
-                    value: Provider.of<Socket>(context).nicknameToStream)
+                    value: getIt<Socket>().nicknameToStream)
               ],
               child: Builder(builder: (BuildContext context) {
                 ////// HANDLE STREAMPROVIDERS //////
@@ -256,7 +257,7 @@ class _InGameScreenState extends State<InGameScreen> {
                           if (nickname.isNotEmpty &&
                               nickname != originalNickname) {
                             print("Changing nickname to $nickname");
-                            Provider.of<Socket>(context, listen: false)
+                            getIt<Socket>()
                                 .socketIO
                                 .emit('setNickname',
                                     OuistitiSetNickname(nickname).toJson());
