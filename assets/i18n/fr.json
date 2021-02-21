@@ -11,7 +11,7 @@
   "password_field_create_game": "Mot de passe (laisser vide pour aucun mdp)",
   "create_button": "Créer",
   "leave_game_dialog_title": "Quitter le jeu",
-  "leave_game_dialog_message": "Etes-vous sûr(e) de vouloir quitter le jeu ?",
+  "leave_game_dialog_message": "Voulez-vous vraiment quitter le jeu ?",
   "yes": "Oui",
   "no": "Non",
   "join_game_dialog_title": "Rejoindre le jeu de %s",
