@@ -23,8 +23,6 @@ class InGameScreen extends StatefulWidget {
 class _InGameScreenState extends State<InGameScreen> {
   AppLocalizations i18n;
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
   // Fonts
   static const _kFontFam = 'OuistitiApp';
   static const _kFontPkg = null;
@@ -93,14 +91,18 @@ class _InGameScreenState extends State<InGameScreen> {
         child: ViewModelBuilder<InGameViewModel>.reactive(
             builder: (context, model, child) {
               print("Rebuilding InGameScreen WillPopScope...");
-              if (model.nicknameServerErrorMsgKey != null) {
-                showErrorMessageSnackBar(
-                    i18n.translate(model.nicknameServerErrorMsgKey));
-                // Avoid showing the same error message again on next build
-                model.nicknameServerErrorMsgKey = null;
-              }
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                print("InGameScreen: done rebuilding widget");
+                if (model.nicknameServerErrorMsgKey != null) {
+                  showErrorMessageSnackBar(
+                      i18n.translate(model.nicknameServerErrorMsgKey));
+                  // Avoid showing the same error message again on next build
+                  model.nicknameServerErrorMsgKey = null;
+                }
+              });
+
               return Scaffold(
-                key: _scaffoldKey,
                 backgroundColor: MaterialColor(0xFF366336, boardColor),
                 body: Stack(
                   children: <Widget>[
@@ -197,18 +199,19 @@ class _InGameScreenState extends State<InGameScreen> {
 
   showErrorMessageSnackBar(String errorMessage) {
     print("showErrorMessageSnackBar");
-    if (_scaffoldKey.currentState != null) {
-      if (errorMessage.isNotEmpty) {
-        _scaffoldKey.currentState
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(
-            content: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text(errorMessage), Icon(Icons.error)],
-            ),
-            backgroundColor: Colors.red,
-          ));
-      }
+    if (errorMessage.isNotEmpty) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(errorMessage),
+              Icon(Icons.error, color: Colors.white)
+            ],
+          ),
+          backgroundColor: Colors.red,
+        ));
     }
   }
 

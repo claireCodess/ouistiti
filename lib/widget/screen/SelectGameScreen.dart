@@ -32,8 +32,6 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
   final nicknameTextFieldController = TextEditingController();
   final passwordTextFieldController = TextEditingController();
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
   @override
   void initState() {
     super.initState();
@@ -55,7 +53,6 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
 
     print("Build main widget");
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(i18n.translate("select_game_title")),
       ),
@@ -192,18 +189,19 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
   }
 
   showErrorMessageSnackBar(String errorMessage) {
-    if (_scaffoldKey.currentState != null) {
-      if (errorMessage.isNotEmpty) {
-        _scaffoldKey.currentState
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(
-            content: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text(errorMessage), Icon(Icons.error)],
-            ),
-            backgroundColor: Colors.red,
-          ));
-      }
+    if (errorMessage.isNotEmpty) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(errorMessage),
+              Icon(Icons.error, color: Colors.white)
+            ],
+          ),
+          backgroundColor: Colors.red,
+        ));
     }
   }
 
