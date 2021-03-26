@@ -2,16 +2,14 @@ import 'package:align_positioned/align_positioned.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ouistiti/di/Injection.dart';
-import 'package:ouistiti/dto/OuisitiSetNickname.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
-import 'package:ouistiti/socket/Socket.dart';
 import 'package:ouistiti/util/PopResult.dart';
-import 'package:ouistiti/util/error/NicknameError.dart';
-import 'package:ouistiti/widget/screen/arguments/JoinGameArguments.dart';
-import 'package:provider/provider.dart';
+import 'package:ouistiti/viewmodel/InGameViewModel.dart';
+import 'package:stacked/stacked.dart';
 
 import '../../main.dart';
 import 'SelectGameScreen.dart';
+import 'arguments/JoinGameArguments.dart';
 
 class InGameScreen extends StatefulWidget {
   InGameScreen({Key key}) : super(key: key);
@@ -24,6 +22,8 @@ class InGameScreen extends StatefulWidget {
 
 class _InGameScreenState extends State<InGameScreen> {
   AppLocalizations i18n;
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   // Fonts
   static const _kFontFam = 'OuistitiApp';
@@ -88,14 +88,19 @@ class _InGameScreenState extends State<InGameScreen> {
         ModalRoute.of(context).settings.arguments;
     bool isHost =
         joinGameArgs.gameDetails.hostId == joinGameArgs.gameDetails.selfId;
-    String nickname = joinGameArgs.nickname;
 
-    return StreamProvider<String>(
-        create: (_) => getIt<Socket>().nicknameToStream,
-        initialData: nickname,
-        builder: (context, _) {
-          return WillPopScope(
-              child: Scaffold(
+    return WillPopScope(
+        child: ViewModelBuilder<InGameViewModel>.reactive(
+            builder: (context, model, child) {
+              print("Rebuilding InGameScreen WillPopScope...");
+              if (model.nicknameServerErrorMsgKey != null) {
+                showErrorMessageSnackBar(
+                    i18n.translate(model.nicknameServerErrorMsgKey));
+                // Avoid showing the same error message again on next build
+                model.nicknameServerErrorMsgKey = null;
+              }
+              return Scaffold(
+                key: _scaffoldKey,
                 backgroundColor: MaterialColor(0xFF366336, boardColor),
                 body: Stack(
                   children: <Widget>[
@@ -128,7 +133,11 @@ class _InGameScreenState extends State<InGameScreen> {
                         child: Positioned(
                             top: 16,
                             left: 16,
-                            child: Icon(wrench, color: Colors.white))),
+                            child: GestureDetector(
+                                child: Icon(wrench, color: Colors.white),
+                                onTap: () {
+                                  createModifyPlayerOrderDialog(context);
+                                }))),
                     Positioned(
                         bottom: 16,
                         left: 16,
@@ -139,7 +148,10 @@ class _InGameScreenState extends State<InGameScreen> {
                               Icon(Icons.person, color: Colors.white),
                               Padding(
                                   padding: EdgeInsets.only(left: 4),
-                                  child: Text(context.watch<String>(),
+                                  child: Text(
+                                      model.nickname != null
+                                          ? model.nickname
+                                          : joinGameArgs.nickname,
                                       style: TextStyle(color: Colors.white))),
                               Padding(
                                   padding: EdgeInsets.only(left: 8),
@@ -148,12 +160,10 @@ class _InGameScreenState extends State<InGameScreen> {
                                           color: Colors.white),
                                       onTap: () {
                                         createModifyPlayerInfoDialog(
-                                                context, nickname)
-                                            .then((newNickname) {
-                                          if (newNickname is String) {
-                                            nickname = newNickname;
-                                          }
-                                        });
+                                            context,
+                                            model.nickname != null
+                                                ? model.nickname
+                                                : joinGameArgs.nickname);
                                       }))
                             ])),
                     Positioned(
@@ -166,9 +176,10 @@ class _InGameScreenState extends State<InGameScreen> {
                             })),
                   ],
                 ),
-              ),
-              onWillPop: _requestPop);
-        });
+              );
+            },
+            viewModelBuilder: () => getIt<InGameViewModel>()),
+        onWillPop: _requestPop);
   }
 
   Future<bool> _requestPop() {
@@ -184,6 +195,23 @@ class _InGameScreenState extends State<InGameScreen> {
     return new Future.value(false);
   }
 
+  showErrorMessageSnackBar(String errorMessage) {
+    print("showErrorMessageSnackBar");
+    if (_scaffoldKey.currentState != null) {
+      if (errorMessage.isNotEmpty) {
+        _scaffoldKey.currentState
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [Text(errorMessage), Icon(Icons.error)],
+            ),
+            backgroundColor: Colors.red,
+          ));
+      }
+    }
+  }
+
   createModifyPlayerInfoDialog(BuildContext context, String originalNickname) {
     final nicknameTextFieldController = TextEditingController();
     nicknameTextFieldController.text = originalNickname;
@@ -191,33 +219,8 @@ class _InGameScreenState extends State<InGameScreen> {
     return showDialog(
         context: context,
         builder: (context) {
-          return MultiProvider(
-              providers: [
-                StreamProvider<NicknameError>.value(
-                    value: getIt<Socket>()
-                        .nicknameErrorMsgToStream),
-                StreamProvider<String>.value(
-                    value: getIt<Socket>().nicknameToStream)
-              ],
-              child: Builder(builder: (BuildContext context) {
-                ////// HANDLE STREAMPROVIDERS //////
-                // nicknameError
-                String nicknameErrorMessage;
-                NicknameError nicknameErrorDto = context.watch<NicknameError>();
-                if (nicknameErrorDto != null &&
-                    nicknameErrorDto.errorMessageKey.isNotEmpty) {
-                  nicknameErrorMessage =
-                      i18n.translate(nicknameErrorDto.errorMessageKey);
-                }
-
-                // nicknameSuccess
-                String nickname = context.watch<String>();
-                if (nickname != null) {
-                  print("Nickname changed successfully to: $nickname");
-                  Navigator.of(context).pop(nickname);
-                }
-
-                ////// UI //////
+          return ViewModelBuilder<InGameViewModel>.reactive(
+              builder: (context, model, child) {
                 return AlertDialog(
                     scrollable: true,
                     title: Text(i18n.translate("modify_player_info")),
@@ -233,7 +236,13 @@ class _InGameScreenState extends State<InGameScreen> {
                                       EdgeInsets.fromLTRB(12, 12, 12, 12),
                                   border: OutlineInputBorder(),
                                   labelText: i18n.translate("nickname_field"),
-                                  errorText: nicknameErrorMessage),
+                                  errorText:
+                                      model.nicknameLocalErrorMsgKey != null &&
+                                              model.nicknameLocalErrorMsgKey
+                                                  .isNotEmpty
+                                          ? i18n.translate(
+                                              model.nicknameLocalErrorMsgKey)
+                                          : null),
                               maxLength: 20,
                             )),
                       ],
@@ -254,25 +263,27 @@ class _InGameScreenState extends State<InGameScreen> {
                         ),
                         onPressed: () {
                           String nickname = nicknameTextFieldController.text;
-                          if (nickname.isNotEmpty &&
-                              nickname != originalNickname) {
-                            print("Changing nickname to $nickname");
-                            getIt<Socket>()
-                                .socketIO
-                                .emit('setNickname',
-                                    OuistitiSetNickname(nickname).toJson());
+                          if (nickname.isNotEmpty) {
+                            if (nickname != originalNickname) {
+                              print("Changing nickname to $nickname");
+                              model.changeNickname(nickname);
+                            }
+                            Navigator.of(context).pop(nickname);
                           } else if (nickname.isEmpty) {
                             print("Error: please enter a nickname");
-                            context
-                                .read<Socket>()
-                                .showNicknameError("error_no_nickname");
+                            model.showNicknameError("error_no_nickname");
                           }
                         },
                       ),
                     ]);
-              }));
+              },
+              viewModelBuilder: () => getIt<InGameViewModel>());
         },
         barrierDismissible:
-            true); // The player can choose to press outside of the alert dialog to not join the game
+            true); // The player can choose to press outside of the alert dialog to cancel modifications
+  }
+
+  createModifyPlayerOrderDialog(BuildContext context) {
+    // TODO
   }
 }

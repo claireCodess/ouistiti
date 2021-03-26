@@ -29,20 +29,22 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.0
+  cupertino_icons: ^1.0.2
   socket_io_client: ^0.9.12
-  provider: ^4.3.2+2
+  provider: ^5.0.0
   injectable: ^1.0.5
-  get_it: ^5.0.3
-  stacked: ^1.7.7
-  sprintf: ^5.0.0
-  align_positioned: ^1.2.14
+  get_it: ^6.0.0
+  stacked: ^1.9.8
+  sprintf: ^6.0.0
+  align_positioned: ^2.0.0
+  auto_route: ^1.0.2
+  stacked_services: ^0.7.3
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   build_runner:
-  injectable_generator: ^1.0.6
+  logging: ^0.11.3+2
+  injectable_generator:
+  auto_route_generator:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
