@@ -337,49 +337,64 @@ class _InGameScreenState extends State<InGameScreen> {
 
   Widget buildListPlayers(List<String> listPlayers) {
     print("Building list of players...with ${listPlayers.length} players");
-    return ListView.builder(
+    return ReorderableListView.builder(
       shrinkWrap: true,
+      onReorder: (oldIndex, newIndex) {
+        if (oldIndex < newIndex) {
+          newIndex -= 1;
+        }
+        final String item = listPlayers.removeAt(oldIndex);
+        listPlayers.insert(newIndex, item);
+      },
       itemCount: listPlayers.length,
       itemBuilder: (BuildContext context, int index) {
         String playerNickname = listPlayers[index];
-        return Padding(
+        return /*Padding(
             padding:
                 const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
-            child: Material(
-                color: Theme.of(context).primaryColor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0)),
-                child: GestureDetector(
-                    onVerticalDragStart: (dragStartDetails) {
-                      print("drag start");
-                    },
-                    onVerticalDragUpdate: (dragUpdateDetails) {
-                      print("drag update");
-                    },
-                    onVerticalDragEnd: (dragEndDetails) {
-                      print("drag end");
-                    },
-                    child: InkWell(
-                        child: Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: ListTile(
-                          leading: Icon(Icons.person,
-                              size: 24.0,
-                              color: Colors
-                                  .white), // TODO: use CircleAvatar with symbol representing person
-                          title: AutoSizeText(playerNickname,
-                              style: TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                              maxLines: 2),
-                          trailing: Icon(Icons.drag_handle)),
-                    )))));
+            child: */
+            PlayerWidget(
+                key: ValueKey(playerNickname), playerNickname: playerNickname);
+        /*Draggable<String>(
+                data: playerNickname,
+                child: PlayerWidget(playerNickname),
+                feedback: PlayerWidget(playerNickname))*/
+        //);
       },
     );
   }
 
   startGame() {
     // TODO
+  }
+}
+
+class PlayerWidget extends StatelessWidget {
+  PlayerWidget({Key key, this.playerNickname}) : super(key: key);
+
+  final String playerNickname;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+        color: Theme.of(context).primaryColor,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        child: InkWell(
+            child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: ListTile(
+              leading: Icon(Icons.person,
+                  size: 24.0,
+                  color: Colors
+                      .white), // TODO: use CircleAvatar with symbol representing person
+              title: AutoSizeText(playerNickname,
+                  style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                  maxLines: 2),
+              trailing: Icon(Icons.drag_handle)),
+        )));
   }
 }
