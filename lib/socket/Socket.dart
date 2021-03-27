@@ -4,7 +4,6 @@ import 'package:injectable/injectable.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGetNickname.dart';
-import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:ouistiti/util/error/NicknameError.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -13,7 +12,7 @@ class Socket {
   IO.Socket socketIO;
 
   // Raw data
-  List<OuistitiGame> listGames = List<OuistitiGame>();
+  List<OuistitiGame> listGames = [];
   OuistitiGameDetails currentGame;
   OuistitiGetNickname nickname;
 
@@ -25,8 +24,7 @@ class Socket {
       _listGamesController.stream;
 
   StreamController<String> _errorMessageController;
-  Stream<String> get errorMessageToStream =>
-      _errorMessageController.stream;
+  Stream<String> get errorMessageToStream => _errorMessageController.stream;
 
   StreamController<OuistitiGameDetails> _chosenGameController;
   Stream<OuistitiGameDetails> get chosenGameToStream =>
@@ -54,7 +52,7 @@ class Socket {
     print("Begin initSocketAndEstablishConnection");
 
     // Initialising the list of games
-    listGames = List<OuistitiGame>();
+    listGames = [];
 
     // Creating the socket
     socketIO = IO.io('https://ec2.tomika.ink/cards', <String, dynamic>{
@@ -120,13 +118,13 @@ class Socket {
       // It's important here that listGames gets replaced by a new instance.
       // If we just call clear() on it, the controller will get the impression
       // that the data hasn't changed, and thus will not send the event.
-      listGames = List<OuistitiGame>();
+      listGames = [];
       for (dynamic game in games) {
         listGames.add(OuistitiGame.fromMap(game));
       }
       print("Add to controller the new list of games");
       _listGamesController.add(listGames);
-      if(this._listGamesController.hasListener) {
+      if (this._listGamesController.hasListener) {
         print("_listGamesController has listener");
       } else {
         print("_listGamesController has NO listener");

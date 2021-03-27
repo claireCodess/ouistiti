@@ -58,7 +58,7 @@ class _InGameScreenState extends State<InGameScreen> {
               title: Text(i18n.translate("leave_game_dialog_title")),
               content: Text(i18n.translate("leave_game_dialog_message")),
               actions: <Widget>[
-                FlatButton(
+                TextButton(
                   child: Text(i18n.translate("yes")),
                   onPressed: () {
                     // Close the dialog AND transfer PopWithResults to pop directly back
@@ -68,7 +68,7 @@ class _InGameScreenState extends State<InGameScreen> {
                         toPage: SelectGameScreen.pageName));
                   },
                 ),
-                FlatButton(
+                TextButton(
                     child: Text(i18n.translate("no")),
                     onPressed: () {
                       // Just close the dialog
@@ -128,7 +128,7 @@ class _InGameScreenState extends State<InGameScreen> {
                                             BorderRadius.circular(20.0))),
                                 child: Text(i18n.translate("start_game_button"),
                                     style: TextStyle(
-                                        color: Colors.white, fontSize: 22.0)))),
+                                        color: Colors.white, fontSize: 22.0)), onPressed: startGame())),
                         moveByChildHeight: 1.0),
                     Visibility(
                         visible: isHost,
@@ -287,6 +287,10 @@ class _InGameScreenState extends State<InGameScreen> {
   }
 
   createModifyPlayerOrderDialog(BuildContext context) {
+    // TODO
+  }
+
+  startGame() {
     // TODO
   }
 }

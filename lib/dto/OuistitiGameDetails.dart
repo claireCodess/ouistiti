@@ -21,11 +21,11 @@ class OuistitiGameDetails {
   final String hostId;
 
   static OuistitiGameDetails fromMap(Map<String, dynamic> data) {
-    List<OuistitiPlayer> playersList = new List<OuistitiPlayer>();
+    List<OuistitiPlayer> playersList = [];
     data["players"].asMap().forEach((key, value) {
       playersList.add(OuistitiPlayer.fromMap(value));
     });
-    List<String> playerIdOrderList = new List<String>();
+    List<String> playerIdOrderList = [];
     data["playerIdOrder"].asMap().forEach((key, value) {
       playerIdOrderList.add(value);
     });

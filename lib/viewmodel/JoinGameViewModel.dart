@@ -16,10 +16,6 @@ const String _JoinGameErrorStreamKey = 'joingameerror-stream';
 class JoinGameViewModel extends MultipleStreamViewModel {
   Socket _socket;
 
-/*  StreamSubscription<List<OuistitiGame>> listGamesStreamSub;
-  StreamSubscription<OuistitiGameDetails> chosenGameErrorStreamSub;
-  StreamSubscription<String> joinGameErrorStreamSub;*/
-
   List<OuistitiGame> listGames;
   OuistitiGameDetails chosenGame;
   JoinGameError joinGameError;
@@ -105,10 +101,6 @@ class JoinGameViewModel extends MultipleStreamViewModel {
     print(this.hashCode);
     print("Hash code of socket in JoinGameViewModel:");
     print(this._socket.hashCode);
-
-/*    listGamesStreamSub = listenToGamesList();
-    chosenGameErrorStreamSub = listenToChosenGame();
-    joinGameErrorStreamSub = listenToErrorMessage();*/
   }
 
   @override
@@ -116,9 +108,6 @@ class JoinGameViewModel extends MultipleStreamViewModel {
     super.dispose();
     print("JoinGameViewModel on dispose, hash code:");
     print(this.hashCode);
-/*    listGamesStreamSub.cancel();
-    chosenGameErrorStreamSub.cancel();
-    joinGameErrorStreamSub.cancel();*/
   }
 
   StreamSubscription<List<OuistitiGame>> listenToGamesList() {
