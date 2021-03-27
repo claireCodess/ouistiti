@@ -1,4 +1,5 @@
 import 'package:align_positioned/align_positioned.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ouistiti/di/Injection.dart';
@@ -128,7 +129,8 @@ class _InGameScreenState extends State<InGameScreen> {
                                             BorderRadius.circular(20.0))),
                                 child: Text(i18n.translate("start_game_button"),
                                     style: TextStyle(
-                                        color: Colors.white, fontSize: 22.0)), onPressed: startGame())),
+                                        color: Colors.white, fontSize: 22.0)),
+                                onPressed: startGame())),
                         moveByChildHeight: 1.0),
                     Visibility(
                         visible: isHost,
@@ -287,7 +289,94 @@ class _InGameScreenState extends State<InGameScreen> {
   }
 
   createModifyPlayerOrderDialog(BuildContext context) {
-    // TODO
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return ViewModelBuilder<InGameViewModel>.reactive(
+              builder: (context, model, child) {
+                double height = MediaQuery.of(context).size.height;
+                double width = MediaQuery.of(context).size.width;
+                List<String> listPlayers = [
+                  "A very long name 123",
+                  "Claire",
+                  "Steve",
+                  "David"
+                ];
+
+                return AlertDialog(
+                    title: Text(i18n.translate("modify_player_order")),
+                    content: Container(
+                      width: double.minPositive,
+                      child: buildListPlayers(listPlayers),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.only(
+                              top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
+                          backgroundColor: Theme.of(context).primaryColor,
+                          primary: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0)),
+                        ),
+                        child: Text(
+                          i18n.translate("modify_button"),
+                          style: TextStyle(color: Colors.white, fontSize: 15.0),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ]);
+              },
+              viewModelBuilder: () => getIt<InGameViewModel>());
+        },
+        barrierDismissible:
+            true); // The host can choose to press outside of the alert dialog to cancel modifications
+  }
+
+  Widget buildListPlayers(List<String> listPlayers) {
+    print("Building list of players...with ${listPlayers.length} players");
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: listPlayers.length,
+      itemBuilder: (BuildContext context, int index) {
+        String playerNickname = listPlayers[index];
+        return Padding(
+            padding:
+                const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+            child: Material(
+                color: Theme.of(context).primaryColor,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
+                child: GestureDetector(
+                    onVerticalDragStart: (dragStartDetails) {
+                      print("drag start");
+                    },
+                    onVerticalDragUpdate: (dragUpdateDetails) {
+                      print("drag update");
+                    },
+                    onVerticalDragEnd: (dragEndDetails) {
+                      print("drag end");
+                    },
+                    child: InkWell(
+                        child: Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: ListTile(
+                          leading: Icon(Icons.person,
+                              size: 24.0,
+                              color: Colors
+                                  .white), // TODO: use CircleAvatar with symbol representing person
+                          title: AutoSizeText(playerNickname,
+                              style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                              maxLines: 2),
+                          trailing: Icon(Icons.drag_handle)),
+                    )))));
+      },
+    );
   }
 
   startGame() {

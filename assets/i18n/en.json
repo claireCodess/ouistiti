@@ -28,5 +28,6 @@
   "waiting_for_players": "Waiting for players...",
   "start_game_button": "Start game",
   "modify_player_info": "Modify player info",
-  "modify_button": "Modify"
+  "modify_button": "Modify",
+  "modify_player_order": "Modify player order"
 }
