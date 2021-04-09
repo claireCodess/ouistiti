@@ -1,7 +1,9 @@
 import 'package:align_positioned/align_positioned.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' hide ReorderableList;
+import 'package:flutter/material.dart' hide ReorderableList;
 import 'package:flutter/services.dart';
+import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:ouistiti/di/Injection.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/util/PopResult.dart';
@@ -255,8 +257,8 @@ class _InGameScreenState extends State<InGameScreen> {
                     actions: <Widget>[
                       TextButton(
                         style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(
-                              top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 10.0, horizontal: 25.0),
                           backgroundColor: Theme.of(context).primaryColor,
                           primary: Colors.white,
                           shape: RoundedRectangleBorder(
@@ -292,76 +294,15 @@ class _InGameScreenState extends State<InGameScreen> {
     return showDialog(
         context: context,
         builder: (context) {
-          return ViewModelBuilder<InGameViewModel>.reactive(
-              builder: (context, model, child) {
-                double height = MediaQuery.of(context).size.height;
-                double width = MediaQuery.of(context).size.width;
-                List<String> listPlayers = [
-                  "A very long name 123",
-                  "Claire",
-                  "Steve",
-                  "David"
-                ];
-
-                return AlertDialog(
-                    title: Text(i18n.translate("modify_player_order")),
-                    content: Container(
-                      width: double.minPositive,
-                      child: buildListPlayers(listPlayers),
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(
-                              top: 10.0, bottom: 10.0, left: 25.0, right: 25.0),
-                          backgroundColor: Theme.of(context).primaryColor,
-                          primary: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0)),
-                        ),
-                        child: Text(
-                          i18n.translate("modify_button"),
-                          style: TextStyle(color: Colors.white, fontSize: 15.0),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ]);
-              },
-              viewModelBuilder: () => getIt<InGameViewModel>());
+          return ModifyPlayerOrderDialog(listPlayers: [
+            PlayerData("A very long name 123", ValueKey(0)),
+            PlayerData("Claire", ValueKey(1)),
+            PlayerData("Steve", ValueKey(2)),
+            PlayerData("David", ValueKey(3))
+          ]);
         },
         barrierDismissible:
             true); // The host can choose to press outside of the alert dialog to cancel modifications
-  }
-
-  Widget buildListPlayers(List<String> listPlayers) {
-    print("Building list of players...with ${listPlayers.length} players");
-    return ReorderableListView.builder(
-      shrinkWrap: true,
-      onReorder: (oldIndex, newIndex) {
-        if (oldIndex < newIndex) {
-          newIndex -= 1;
-        }
-        final String item = listPlayers.removeAt(oldIndex);
-        listPlayers.insert(newIndex, item);
-      },
-      itemCount: listPlayers.length,
-      itemBuilder: (BuildContext context, int index) {
-        String playerNickname = listPlayers[index];
-        return /*Padding(
-            padding:
-                const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
-            child: */
-            PlayerWidget(
-                key: ValueKey(playerNickname), playerNickname: playerNickname);
-        /*Draggable<String>(
-                data: playerNickname,
-                child: PlayerWidget(playerNickname),
-                feedback: PlayerWidget(playerNickname))*/
-        //);
-      },
-    );
   }
 
   startGame() {
@@ -369,32 +310,152 @@ class _InGameScreenState extends State<InGameScreen> {
   }
 }
 
-class PlayerWidget extends StatelessWidget {
-  PlayerWidget({Key key, this.playerNickname}) : super(key: key);
+class ModifyPlayerOrderDialog extends StatefulWidget {
+  ModifyPlayerOrderDialog({Key key, @required this.listPlayers})
+      : super(key: key);
+
+  final List<PlayerData> listPlayers;
+
+  @override
+  _ModifyPlayerOrderDialogState createState() =>
+      _ModifyPlayerOrderDialogState(listPlayers);
+}
+
+class _ModifyPlayerOrderDialogState extends State<ModifyPlayerOrderDialog> {
+  List<PlayerData> listPlayers;
+
+  _ModifyPlayerOrderDialogState(List<PlayerData> players) {
+    listPlayers = players;
+  }
+
+  Widget build(BuildContext context) {
+    return Material(
+        child: ViewModelBuilder<InGameViewModel>.reactive(
+            builder: (context, model, child) {
+              AppLocalizations i18n = AppLocalizations.of(context);
+              double height = MediaQuery.of(context).size.height;
+              double width = MediaQuery.of(context).size.width;
+
+              return AlertDialog(
+                  title: Text(i18n.translate("modify_player_order")),
+                  contentPadding: EdgeInsets.only(top: 20.0, bottom: 24.0),
+                  content: Container(
+                    width: double.minPositive,
+                    child: buildListPlayers(),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 25.0),
+                        backgroundColor: Theme.of(context).primaryColor,
+                        primary: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0)),
+                      ),
+                      child: Text(
+                        i18n.translate("modify_button"),
+                        style: TextStyle(color: Colors.white, fontSize: 15.0),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ]);
+            },
+            viewModelBuilder: () => getIt<InGameViewModel>()));
+  }
+
+  Widget buildListPlayers() {
+    print("Building list of players...with ${listPlayers.length} players");
+
+    return ReorderableList(
+      onReorder: this._reorderCallback,
+      onReorderDone: this._reorderDone,
+      child: CustomScrollView(
+        // cacheExtent: 3000,
+        slivers: <Widget>[
+          SliverPadding(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).padding.bottom),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return PlayerWidget(
+                        data: listPlayers[index],
+                        // first and last attributes affect border drawn during dragging
+                        isFirst: index == 0,
+                        isLast: index == listPlayers.length - 1);
+                  },
+                  childCount: listPlayers.length,
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
+  // Returns index of item with given key
+  int _indexOfKey(Key key) {
+    return listPlayers.indexWhere((PlayerData d) => d.key == key);
+  }
+
+  bool _reorderCallback(Key item, Key newPosition) {
+    int draggingIndex = _indexOfKey(item);
+    int newPositionIndex = _indexOfKey(newPosition);
+
+    final draggedItem = listPlayers[draggingIndex];
+    setState(() {
+      debugPrint("Reordering $item -> $newPosition");
+      listPlayers.removeAt(draggingIndex);
+      listPlayers.insert(newPositionIndex, draggedItem);
+    });
+    return true;
+  }
+
+  void _reorderDone(Key item) {
+    final draggedItem = listPlayers[_indexOfKey(item)];
+    debugPrint("Reordering finished for ${draggedItem.playerNickname}");
+  }
+}
+
+class PlayerData {
+  PlayerData(this.playerNickname, this.key);
 
   final String playerNickname;
 
-  @override
-  Widget build(BuildContext context) {
+  // Each item in reorderable list needs stable and unique key
+  final Key key;
+}
+
+class PlayerWidget extends StatelessWidget {
+  PlayerWidget(
+      {@required this.data, @required this.isFirst, @required this.isLast});
+
+  final PlayerData data;
+  final bool isFirst;
+  final bool isLast;
+
+  Widget _buildChild(BuildContext context, ReorderableItemState state) {
     return Material(
-        color: Theme.of(context).primaryColor,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        color: Colors.white,
         child: InkWell(
-            child: Padding(
-          padding: const EdgeInsets.all(2.0),
           child: ListTile(
               leading: Icon(Icons.person,
                   size: 24.0,
-                  color: Colors
-                      .white), // TODO: use CircleAvatar with symbol representing person
-              title: AutoSizeText(playerNickname,
+                  color: Colors.grey
+                      .shade700), // TODO: use CircleAvatar with symbol representing person
+              title: AutoSizeText(data.playerNickname,
                   style: TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                  maxLines: 2),
-              trailing: Icon(Icons.drag_handle)),
-        )));
+                      color: Colors.grey.shade700)),
+              trailing: ReorderableListener(child: Icon(Icons.drag_handle))),
+        ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ReorderableItem(key: data.key, childBuilder: _buildChild);
   }
 }

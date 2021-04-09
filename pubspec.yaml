@@ -40,6 +40,7 @@ dependencies:
   auto_route: ^1.0.2
   stacked_services: ^0.7.3
   auto_size_text: ^2.1.0
+  flutter_reorderable_list: ^1.0.0
 
 dev_dependencies:
   build_runner:
