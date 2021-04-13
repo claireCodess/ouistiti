@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouistiti/bloc/list_games_bloc.dart';
 import 'package:ouistiti/di/Injection.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
@@ -37,7 +39,6 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print("Done loading widget");
-      getIt<Socket>().initSocketAndEstablishConnection();
     });
   }
 
@@ -51,35 +52,27 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     width = MediaQuery.of(context).size.width;
     i18n = AppLocalizations.of(context);
 
+    final listGamesBloc = BlocProvider.of<ListGamesBloc>(context);
+    listGamesBloc.add(InitSocketConnection());
+
     print("Build main widget");
     return Scaffold(
       appBar: AppBar(
         title: Text(i18n.translate("select_game_title")),
       ),
-      body: Center(
-          child:
-              /* ChangeNotifierProvider<JoinGameViewModel>.value(
-              value: getIt<JoinGameViewModel>(), builder: (context, _) {*/
-              ViewModelBuilder<JoinGameViewModel>.reactive(
-                  builder: (context, model, child) {
-                    print("Need to rebuild");
-                    List<OuistitiGame> listGames = model
-                        .listGames; //context.select((JoinGameViewModel vm) => vm.listGames);
-                    if (listGames != null) {
-                      print(
-                          "Rebuild UI with ${listGames.length} games in the list");
-                      return Container(
-                        padding: EdgeInsets.only(top: 20),
-                        height: height,
-                        width: width,
-                        child: buildListGames(listGames),
-                      );
-                    } else {
-                      print("Rebuild UI with a null list");
-                      return buildLoading();
-                    }
-                  },
-                  viewModelBuilder: () => getIt<JoinGameViewModel>())),
+      body: Center(child:
+          BlocBuilder<ListGamesBloc, ListGamesState>(builder: (context, state) {
+        print("Need to rebuild");
+        if (state is ListGamesSuccess) {
+          print("Rebuild UI with ${state.listGames.length} games in the list");
+          return buildListGames(state.listGames);
+        } else if (state is ListGamesLoading) {
+          return buildLoading();
+        } else {
+          // Just return empty container
+          return Container();
+        }
+      })),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).primaryColorDark,
         onPressed: () {
@@ -99,69 +92,73 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
 
   Widget buildListGames(List<OuistitiGame> listGames) {
     print("Rebuilding list of games...with ${listGames.length} games");
-    return ListView.builder(
-      itemCount: listGames.length,
-      itemBuilder: (BuildContext context, int index) {
-        OuistitiGame game = listGames[index];
-        Color gameColor;
-        if (game.inProgress || !game.joinable) {
-          gameColor = Theme.of(context).primaryColorLight;
-        } else {
-          gameColor = Theme.of(context).primaryColor;
-        }
-        return Padding(
-            padding:
-                const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
-            child: Material(
-                color: gameColor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0)),
-                child: InkWell(
-                    onTap: () {
-                      if (game.inProgress) {
-                        showErrorMessageSnackBar(
-                            i18n.translate("error_game_in_progress"));
-                      } else if (!game.joinable) {
-                        showErrorMessageSnackBar(
-                            i18n.translate("error_game_full"));
-                      } else {
-                        // The player can access the dialog to enter
-                        // nickname and maybe password
-                        createJoinGameAlertDialog(
-                                context, game.id, game.hostNickname)
-                            .then((data) {
-                          if (data is PopWithResults) {
-                            disconnectPlayerAfterLeavingGame(data, context);
-                          } else if (data is JoinGameError) {
+    return Container(
+        padding: EdgeInsets.only(top: 20),
+        height: height,
+        width: width,
+        child: ListView.builder(
+          itemCount: listGames.length,
+          itemBuilder: (BuildContext context, int index) {
+            OuistitiGame game = listGames[index];
+            Color gameColor;
+            if (game.inProgress || !game.joinable) {
+              gameColor = Theme.of(context).primaryColorLight;
+            } else {
+              gameColor = Theme.of(context).primaryColor;
+            }
+            return Padding(
+                padding: const EdgeInsets.only(
+                    left: 20.0, right: 20.0, bottom: 20.0),
+                child: Material(
+                    color: gameColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0)),
+                    child: InkWell(
+                        onTap: () {
+                          if (game.inProgress) {
                             showErrorMessageSnackBar(
-                                i18n.translate(data.errorMessageKey));
+                                i18n.translate("error_game_in_progress"));
+                          } else if (!game.joinable) {
+                            showErrorMessageSnackBar(
+                                i18n.translate("error_game_full"));
+                          } else {
+                            // The player can access the dialog to enter
+                            // nickname and maybe password
+                            createJoinGameAlertDialog(
+                                    context, game.id, game.hostNickname)
+                                .then((data) {
+                              if (data is PopWithResults) {
+                                disconnectPlayerAfterLeavingGame(data, context);
+                              } else if (data is JoinGameError) {
+                                showErrorMessageSnackBar(
+                                    i18n.translate(data.errorMessageKey));
+                              }
+                            });
                           }
-                        });
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ListTile(
-                          isThreeLine: true,
-                          leading: Icon(Icons.videogame_asset,
-                              size: 28.0, color: Colors.white),
-                          title: Text(game.hostNickname,
-                              style: TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
-                          subtitle: Text(
-                              "${game.inProgress ? "${i18n.translate("inProgress")}\n${i18n.translate("round")}" : (game.joinable ? "${i18n.translate("joinable")}${game.passwordProtected ? "\n${i18n.translate("password_protected")}" : ''}" : i18n.translate("full"))}",
-                              style: TextStyle(color: Colors.white)),
-                          trailing: Text(
-                              "${game.playersCount.toString()} "
-                              "${i18n.translate("player")}"
-                              "${game.playersCount > 1 ? 's' : ''}",
-                              style: TextStyle(
-                                  fontSize: 15.0, color: Colors.white))),
-                    ))));
-      },
-    );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListTile(
+                              isThreeLine: true,
+                              leading: Icon(Icons.videogame_asset,
+                                  size: 28.0, color: Colors.white),
+                              title: Text(game.hostNickname,
+                                  style: TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white)),
+                              subtitle: Text(
+                                  "${game.inProgress ? "${i18n.translate("inProgress")}\n${i18n.translate("round")}" : (game.joinable ? "${i18n.translate("joinable")}${game.passwordProtected ? "\n${i18n.translate("password_protected")}" : ''}" : i18n.translate("full"))}",
+                                  style: TextStyle(color: Colors.white)),
+                              trailing: Text(
+                                  "${game.playersCount.toString()} "
+                                  "${i18n.translate("player")}"
+                                  "${game.playersCount > 1 ? 's' : ''}",
+                                  style: TextStyle(
+                                      fontSize: 15.0, color: Colors.white))),
+                        ))));
+          },
+        ));
   }
 
   Widget buildLoading() {
