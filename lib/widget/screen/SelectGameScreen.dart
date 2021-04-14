@@ -52,9 +52,6 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
     width = MediaQuery.of(context).size.width;
     i18n = AppLocalizations.of(context);
 
-    final listGamesBloc = BlocProvider.of<ListGamesBloc>(context);
-    listGamesBloc.add(InitSocketConnection());
-
     print("Build main widget");
     return Scaffold(
       appBar: AppBar(
@@ -68,6 +65,12 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
           return buildListGames(state.listGames);
         } else if (state is ListGamesLoading) {
           return buildLoading();
+        } else if (state is ListGamesInitial) {
+          // Init socket connection
+          final listGamesBloc = BlocProvider.of<ListGamesBloc>(context);
+          listGamesBloc.add(InitSocketConnection());
+          // And return empty container
+          return Container();
         } else {
           // Just return empty container
           return Container();
