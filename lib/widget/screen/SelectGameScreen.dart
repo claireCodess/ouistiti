@@ -57,25 +57,30 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
       appBar: AppBar(
         title: Text(i18n.translate("select_game_title")),
       ),
-      body: Center(child:
-          BlocBuilder<ListGamesBloc, ListGamesState>(builder: (context, state) {
-        print("Need to rebuild");
-        if (state is ListGamesSuccess) {
-          print("Rebuild UI with ${state.listGames.length} games in the list");
-          return buildListGames(state.listGames);
-        } else if (state is ListGamesLoading) {
-          return buildLoading();
-        } else if (state is ListGamesInitial) {
-          // Init socket connection
-          final listGamesBloc = BlocProvider.of<ListGamesBloc>(context);
-          listGamesBloc.add(InitSocketConnection());
-          // And return empty container
-          return Container();
-        } else {
-          // Just return empty container
-          return Container();
-        }
-      })),
+      body: Center(
+          child: BlocProvider(
+        create: (context) => ListGamesBloc(),
+        child: BlocBuilder<ListGamesBloc, ListGamesState>(
+            builder: (context, state) {
+          print("Need to rebuild");
+          if (state is ListGamesSuccess) {
+            print(
+                "Rebuild UI with ${state.listGames.length} games in the list");
+            return buildListGames(state.listGames);
+          } else if (state is ListGamesLoading) {
+            return buildLoading();
+          } else if (state is ListGamesInitial) {
+            // Init socket connection
+            final listGamesBloc = BlocProvider.of<ListGamesBloc>(context);
+            listGamesBloc.add(InitSocketConnection());
+            // And return empty container
+            return Container();
+          } else {
+            // Just return empty container
+            return Container();
+          }
+        }),
+      )),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).primaryColorDark,
         onPressed: () {
