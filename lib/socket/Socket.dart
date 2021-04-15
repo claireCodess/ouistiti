@@ -1,13 +1,14 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
+import 'package:inject/inject.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGetNickname.dart';
 import 'package:ouistiti/util/error/NicknameError.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-@lazySingleton
+@provide
+@singleton
 class Socket {
   IO.Socket socketIO;
 

@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart' hide ReorderableList;
 import 'package:flutter/material.dart' hide ReorderableList;
 import 'package:flutter/services.dart';
 import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
-import 'package:ouistiti/di/Injection.dart';
+import 'package:ouistiti/di/get_it/Injection.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
 import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/viewmodel/InGameViewModel.dart';

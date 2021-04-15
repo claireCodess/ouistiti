@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:ouistiti/di/Injection.dart';
+import 'package:ouistiti/di/get_it/Injection.dart';
 import 'package:ouistiti/dto/OuisitiSetNickname.dart';
 import 'package:ouistiti/socket/Socket.dart';
 import 'package:ouistiti/util/error/NicknameError.dart';

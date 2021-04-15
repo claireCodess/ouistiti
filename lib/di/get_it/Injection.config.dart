@@ -7,9 +7,9 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
-import '../socket/Socket.dart';
-import '../viewmodel/InGameViewModel.dart';
-import '../viewmodel/JoinGameViewModel.dart';
+import '../../socket/Socket.dart';
+import '../../viewmodel/InGameViewModel.dart';
+import '../../viewmodel/JoinGameViewModel.dart';
 
 /// adds generated dependencies
 /// to the provided [GetIt] instance

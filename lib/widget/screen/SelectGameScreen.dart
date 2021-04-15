@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:inject/inject.dart';
 import 'package:ouistiti/bloc/list_games_bloc.dart';
-import 'package:ouistiti/di/Injection.dart';
+import 'package:ouistiti/di/get_it/Injection.dart';
 import 'package:ouistiti/dto/OuistitiGame.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
@@ -18,8 +19,10 @@ import 'package:stacked/stacked.dart';
 import 'InGameScreen.dart';
 import 'arguments/JoinGameArguments.dart';
 
+@provide
 class SelectGameScreen extends StatefulWidget {
-  SelectGameScreen({Key key}) : super(key: key);
+  final ListGamesBloc bloc;
+  SelectGameScreen({Key key, this.bloc}) : super(key: key);
 
   static final String pageName = "/selectGame";
 
@@ -59,7 +62,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
       ),
       body: Center(
           child: BlocProvider(
-        create: (context) => ListGamesBloc(),
+        create: (context) => widget.bloc,
         child: BlocBuilder<ListGamesBloc, ListGamesState>(
             builder: (context, state) {
           print("Need to rebuild");
@@ -71,8 +74,7 @@ class _SelectGameScreenState extends State<SelectGameScreen> {
             return buildLoading();
           } else if (state is ListGamesInitial) {
             // Init socket connection
-            final listGamesBloc = BlocProvider.of<ListGamesBloc>(context);
-            listGamesBloc.add(InitSocketConnection());
+            widget.bloc.add(InitSocketConnection());
             // And return empty container
             return Container();
           } else {

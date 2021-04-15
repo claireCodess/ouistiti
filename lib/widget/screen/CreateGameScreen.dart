@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ouistiti/di/Injection.dart';
 import 'package:ouistiti/dto/OuistitiGameDetails.dart';
 import 'package:ouistiti/dto/OuistitiGameToCreateOrJoin.dart';
 import 'package:ouistiti/i18n/AppLocalizations.dart';
@@ -9,6 +8,8 @@ import 'package:ouistiti/util/PopResult.dart';
 import 'package:ouistiti/util/error/JoinGameError.dart';
 import 'package:ouistiti/viewmodel/JoinGameViewModel.dart';
 import 'package:stacked/stacked.dart';
+
+import 'package:ouistiti/di/get_it/Injection.dart';
 
 import 'InGameScreen.dart';
 import 'arguments/JoinGameArguments.dart';

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:ouistiti/di/Injection.dart';
+import 'package:inject/inject.dart';
+import 'package:ouistiti/di/get_it/Injection.dart';
 import 'package:ouistiti/util/color/MaterialColorGenerator.dart';
 import 'package:ouistiti/widget/screen/CreateGameScreen.dart';
 import 'package:ouistiti/widget/screen/InGameScreen.dart';
 import 'package:ouistiti/widget/screen/SelectGameScreen.dart';
-import 'package:provider/provider.dart';
 
+import 'di/inject/app_injector.dart';
 import 'i18n/AppLocalizations.dart';
-import 'socket/Socket.dart';
 
-void main() {
+void main() async {
   configureInjection();
-  runApp(
-      Provider<Socket>(create: (_) => Socket(), child: OuistitiApp()));
+  final container = await AppInjector.create();
+  runApp(container.app);
+  // runApp(Provider<Socket>(create: (_) => Socket(), child: OuistitiApp()));
 }
 
 Map<int, Color> boardColor = {
@@ -34,7 +35,12 @@ class Palette {
   static const Color primary = Color(0xFF86A186);
 }
 
+@provide
 class OuistitiApp extends StatelessWidget {
+  final SelectGameScreen selectGameScreen;
+
+  OuistitiApp(this.selectGameScreen) : super();
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -52,7 +58,7 @@ class OuistitiApp extends StatelessWidget {
       ),
       initialRoute: SelectGameScreen.pageName,
       routes: <String, WidgetBuilder>{
-        SelectGameScreen.pageName: (context) => SelectGameScreen(),
+        SelectGameScreen.pageName: (context) => selectGameScreen,
         CreateGameScreen.pageName: (context) => CreateGameScreen(),
         InGameScreen.pageName: (context) => InGameScreen(),
       },
